@@ -26,6 +26,7 @@ import {
   formatScore,
   formatStatus,
   getTacticalStatus,
+  isThemeReviewRequired,
   numberOrNull,
   regimeScore,
   stockRankHistory,
@@ -33,6 +34,7 @@ import {
   type NullableNumber,
   type RankRow,
   type ResultDocument,
+  type ThemeReviewRow,
   type TacticalRow,
 } from "./lib/dashboard";
 
@@ -90,6 +92,11 @@ function stageLabel(stage: string | undefined): string {
   if (stage === "Normal") return "通常";
   if (stage === "Unknown") return "不明";
   return stage ?? "不明";
+}
+
+function rankLabel(value: NullableNumber): string {
+  const rank = formatRank(value);
+  return rank === "—" ? "—" : `#${rank}`;
 }
 
 function tacticalStatusLabel(status: string): string {
@@ -247,6 +254,10 @@ function Dashboard({ result, onSelectTicker, onNavigate }: { result: ResultDocum
     () => result.tacticalRanking.filter((row) => numberOrNull(row.tactical_rank) !== null),
     [result.tacticalRanking],
   );
+  const themeReviewRequired = useMemo(
+    () => result.themeReview.filter(isThemeReviewRequired),
+    [result.themeReview],
+  );
   const rotationChanged = result.rotation.portfolioIn.length + result.rotation.portfolioOut.length;
 
   return (
@@ -311,8 +322,8 @@ function Dashboard({ result, onSelectTicker, onNavigate }: { result: ResultDocum
                     </div>
                     <span className="holding-theme">{holding.theme ?? "テーマ未設定"}</span>
                     <div className="holding-ranks">
-                      <span><small>Tactical</small><strong className="rank-emphasis">#{formatRank(holding.tactical_rank)}</strong></span>
-                      <span><small>Base</small><strong>#{formatRank(holding.base_rank)}</strong></span>
+                      <span><small>Tactical</small><strong className="rank-emphasis">{rankLabel(holding.tactical_rank)}</strong></span>
+                      <span><small>Base</small><strong>{rankLabel(holding.base_rank)}</strong></span>
                       <span><small>健全度</small><strong className={numberClass}>{formatScore(tactical?.health)}</strong></span>
                     </div>
                     <div className="holding-returns">
@@ -325,7 +336,7 @@ function Dashboard({ result, onSelectTicker, onNavigate }: { result: ResultDocum
               })}
             </div>
           ) : (
-            <ReviewNotice result={result} />
+            <ReviewNotice rows={themeReviewRequired} />
           )}
         </div>
 
@@ -334,6 +345,8 @@ function Dashboard({ result, onSelectTicker, onNavigate }: { result: ResultDocum
           <RotationPanel result={result} onSelectTicker={onSelectTicker} />
         </div>
       </section>
+
+      <ThemeReviewPanel rows={result.themeReview} onSelectTicker={onSelectTicker} />
 
       <section className="panel" id="tactical">
         <SectionHeading title="Tacticalランキング" kicker={`${topTactical.length}銘柄が計算対象 / 並べ替え・検索`} />
@@ -380,19 +393,45 @@ function SectionHeading({ title, kicker }: { title: string; kicker: string }) {
   );
 }
 
-function ReviewNotice({ result }: { result: ResultDocument }) {
+function ReviewNotice({ rows }: { rows: ThemeReviewRow[] }) {
   return (
     <div className="review-notice">
       <div className="notice-icon">!</div>
       <div>
-        <strong>採用銘柄の確認が必要です</strong>
-        <p>上位20位以内にテーマ未登録の銘柄があります。テーマを確認するまで採用銘柄は確定しません。</p>
+        <strong>テーマ設定待ちのため採用銘柄を確認中です</strong>
+        <p>{rows.length > 0 ? `Tactical上位30銘柄のうち${rows.length}銘柄にTheme設定がありません。` : "採用候補を確定できるデータがまだありません。"} テーマ確認後にPortfolioを確定します。</p>
         <div className="review-tickers">
-          {result.themeReview.slice(0, 10).map((row) => <span key={row.ticker}>{row.ticker}</span>)}
-          {result.themeReview.length > 10 && <span>+{result.themeReview.length - 10}</span>}
+          {rows.slice(0, 10).map((row) => <span key={row.ticker}>{row.ticker}</span>)}
+          {rows.length > 10 && <span>+{rows.length - 10}</span>}
         </div>
       </div>
     </div>
+  );
+}
+
+function ThemeReviewPanel({ rows, onSelectTicker }: { rows: ThemeReviewRow[]; onSelectTicker: (ticker: string) => void }) {
+  const pending = rows.filter(isThemeReviewRequired);
+  return (
+    <section className="panel theme-review-panel" id="theme-review">
+      <SectionHeading title="テーマ設定待ち" kicker={`Tactical上位${rows.length || 30}銘柄 / Git管理で手動設定`} />
+      {pending.length > 0 ? (
+        <>
+          <p className="theme-review-help">Themeは自動確定しません。<code>config/theme_history.yaml</code>を更新し、GitHub Actionsを再実行してください。</p>
+          <div className="theme-review-list">
+            {pending.map((row) => (
+              <button className="theme-review-row" key={row.ticker} onClick={() => onSelectTicker(row.ticker)}>
+                <span className="theme-review-main"><strong>{row.ticker}</strong><small>{row.company_name ?? "企業名未取得"}</small></span>
+                <span className="theme-review-ranks"><small>Tactical / Base</small><strong>{rankLabel(row.tactical_rank)} / {rankLabel(row.base_rank)}</strong></span>
+                <span className="theme-review-sector"><small>{row.sector ?? "セクター未取得"}</small><span>{row.industry ?? "業種未取得"}</span></span>
+                <span className="mini-pill tone-warning">テーマ設定待ち</span>
+              </button>
+            ))}
+          </div>
+        </>
+      ) : (
+        <div className="empty-state compact-empty"><span className="empty-mark">✓</span><strong>テーマ設定待ちはありません</strong><small>上位30銘柄のThemeが確認済みです</small></div>
+      )}
+    </section>
   );
 }
 
@@ -461,9 +500,10 @@ function TacticalTable({ result, onSelectTicker }: { result: ResultDocument; onS
   const [sorting, setSorting] = useState<SortingState>([{ id: "tactical_rank", desc: false }]);
   const themeByTicker = useMemo(() => {
     const map: Record<string, string> = {};
+    result.themeReview.forEach((row) => { if (row.current_theme) map[row.ticker] = row.current_theme; });
     result.portfolio.forEach((row) => { if (row.theme) map[row.ticker] = row.theme; });
     return map;
-  }, [result.portfolio]);
+  }, [result.portfolio, result.themeReview]);
   const rows = useMemo<TacticalRow[]>(() => result.tacticalRanking.map((row) => ({
     ...row,
     theme: themeByTicker[row.ticker] ?? null,
@@ -581,7 +621,7 @@ function StockDetail({ result, ticker, onBack }: { result: ResultDocument; ticke
       </section>
       <section className="detail-grid">
         <div className="panel chart-panel"><SectionHeading title="ランキング履歴" kicker="前回と今回のTactical順位" /><div className="chart-wrap"><ResponsiveContainer width="100%" height="100%"><LineChart data={history} margin={{ top: 12, right: 10, left: -20, bottom: 4 }}><CartesianGrid strokeDasharray="3 3" stroke="#263244" /><XAxis dataKey="period" stroke="#718096" tickLine={false} axisLine={false} /><YAxis reversed allowDecimals={false} stroke="#718096" tickLine={false} axisLine={false} /><Tooltip contentStyle={{ background: "#151b27", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10 }} labelStyle={{ color: "#f5f7fa" }} /><Line type="monotone" dataKey="tacticalRank" name="Tactical" stroke="#4cc9f0" strokeWidth={2.5} dot={{ r: 4, fill: "#4cc9f0", stroke: "#080b12", strokeWidth: 2 }} connectNulls /></LineChart></ResponsiveContainer></div></div>
-        <div className="panel detail-stats"><SectionHeading title="スナップショット" kicker="現在値" /><DetailStat label="Tactical順位" value={`#${formatRank(tactical?.tactical_rank)}`} accent /><DetailStat label="Base順位" value={`#${formatRank(tactical?.base_rank ?? base?.base_rank)}`} /><DetailStat label="Tacticalスコア" value={formatScore(tactical?.tactical_score)} /><DetailStat label="健全度" value={formatScore(tactical?.health)} /><DetailStat label="YTD / MTD" value={`${formatPercent(tactical?.ytd)} / ${formatPercent(tactical?.mtd)}`} /><DetailStat label="Weekly" value={formatPercent(tactical?.weekly)} /><DetailStat label="Stage" value={stageLabel(tactical?.stage)} /><DetailStat label="採用状態" value={holding ? formatStatus(holding.status) : "未採用"} /></div>
+        <div className="panel detail-stats"><SectionHeading title="スナップショット" kicker="現在値" /><DetailStat label="Tactical順位" value={rankLabel(tactical?.tactical_rank)} accent /><DetailStat label="Base順位" value={rankLabel(tactical?.base_rank ?? base?.base_rank)} /><DetailStat label="Tacticalスコア" value={formatScore(tactical?.tactical_score)} /><DetailStat label="健全度" value={formatScore(tactical?.health)} /><DetailStat label="YTD / MTD" value={`${formatPercent(tactical?.ytd)} / ${formatPercent(tactical?.mtd)}`} /><DetailStat label="Weekly" value={formatPercent(tactical?.weekly)} /><DetailStat label="Stage" value={stageLabel(tactical?.stage)} /><DetailStat label="採用状態" value={holding ? formatStatus(holding.status) : "未採用"} /></div>
       </section>
     </main>
   );

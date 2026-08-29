@@ -6,6 +6,7 @@ import {
   formatPercent,
   formatStatus,
   getTacticalStatus,
+  isThemeReviewRequired,
   stockRankHistory,
 } from "./dashboard";
 
@@ -20,8 +21,15 @@ describe("dashboard helpers", () => {
   it("maps operational and regime labels for the Japanese UI", () => {
     expect(formatStatus("INCOMPLETE")).toBe("不完全");
     expect(formatStatus("THEME_REVIEW_REQUIRED")).toBe("テーマ確認待ち");
+    expect(formatStatus("THEME_SET")).toBe("設定済み");
     expect(displayRegime({ regime: "RISK_ON" })).toBe("Risk ON");
     expect(displayRegime({ regime: "RISK_OFF" })).toBe("Risk OFF");
+  });
+
+  it("identifies Theme Review rows without requiring a Theme editor", () => {
+    expect(isThemeReviewRequired({ ticker: "AAA", required: true })).toBe(true);
+    expect(isThemeReviewRequired({ ticker: "BBB", current_theme: "Cloud Software", required: false })).toBe(false);
+    expect(isThemeReviewRequired({ ticker: "CCC", current_theme: null })).toBe(true);
   });
 
   it("derives the requested Tactical status buckets", () => {

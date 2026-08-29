@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 
 from engine.dates import measurement_date
+from engine.portfolio.theme_review import write_theme_review_output
 from engine.results.models import (
     DataHealth,
     PortfolioMovement,
@@ -324,6 +325,10 @@ def write_result_outputs(
     latest_path = directory / "latest.json"
     _atomic_write(history_path, serialized)
     _atomic_write(latest_path, serialized)
+    write_theme_review_output(
+        [row.model_dump(mode="json") for row in validated.theme_review],
+        directory,
+    )
     return history_path, latest_path
 
 

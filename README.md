@@ -53,7 +53,7 @@ React PWA（静的表示）
 
 ```text
 engine/                 Pythonの取得・検証・ランキング・Portfolio処理
-config/                 Ticker AliasとTheme履歴
+config/                 Primary Themeマスター、Theme履歴、Ticker Alias
 data/                   実行時に生成するCache・Snapshot・結果
 tests/                  Unit Test、Parser Fixture、Golden Fixture
 web/                    React / TypeScript / Vite / PWA
@@ -115,6 +115,7 @@ python -m engine.ranking.regime --previous-state WARNING
 - `data/results/regime-YYYY-MM-DD.json`: Market Regime
 - `data/results/tactical-YYYY-MM-DD.json` / `.csv`: Tactical Ranking
 - `data/portfolio/YYYY-MM-DD.json`: Theme制約後のPortfolio
+- `data/results/theme-review.json`: Tactical上位30銘柄のTheme設定確認
 - `data/results/YYYY-MM-DD.json`: 日付付きFrontend用結果
 - `data/results/latest.json`: 最新結果
 
@@ -130,7 +131,19 @@ Risk OFFでも現金化は行いません。RegimeはBase Scoreの配分を変�
 
 ## Themeの更新
 
-`config/theme_history.yaml`を編集します。計測日時点で有効なレコードだけが使用され、未来のTheme情報を過去へ適用しません。
+Primary Themeは`config/themes.yaml`でマスター管理します。`theme_history.yaml`で使用できる値は、マスターに存在するThemeだけです。Theme候補の自動提案とTheme確定は分離しており、MVPではWeb画面から編集せず、Git管理下で手動更新します。
+
+まず`config/themes.yaml`へ利用可能なPrimary Themeを登録します。
+
+```yaml
+themes:
+  - name: AI Infrastructure
+    description: AI向け半導体・データセンター基盤
+  - name: Cloud Software
+    description: クラウドソフトウェア
+```
+
+次に`config/theme_history.yaml`でTickerごとの有効期間を登録します。`note`は任意です。
 
 ```yaml
 themes:
@@ -138,7 +151,14 @@ themes:
     theme: AI Infrastructure
     effective_from: "2026-01-01"
     effective_to: null
+    note: Primary exposure
 ```
+
+計測日時点で有効なレコードだけが使用され、未来のTheme情報を過去へ適用しません。Tactical上位30銘柄を毎回確認し、Theme未設定の行は`THEME_REVIEW_REQUIRED`として`data/results/theme-review.json`へ出力します。
+
+Theme Reviewには、`ticker`、`company_name`、`tactical_rank`、`base_rank`、`sector`、`industry`、`current_theme`、`required`を含めます。
+
+Theme未設定でもBase RankingとTactical Rankingは正式結果として生成します。未設定銘柄がPortfolioの選定候補になった場合だけ、Portfolio Statusが`THEME_REVIEW_REQUIRED`になります。
 
 Tickerのベンダー差異は`config/ticker_alias.yaml`で管理します。
 
@@ -148,7 +168,7 @@ aliases:
   BF.B: BF-B
 ```
 
-Theme未登録のTactical上位銘柄は`THEME_REVIEW_REQUIRED`となります。Rankingは無効にせず、Portfolioだけ確定保留にします。
+Theme未設定のTactical上位30銘柄はReview対象になります。Rankingは無効にせず、Portfolioだけ必要に応じて確定保留にします。
 
 ## テスト・品質確認
 

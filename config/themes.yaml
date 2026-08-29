@@ -1,0 +1,3 @@
+# Primary Theme master. theme_history.yaml may reference only these names.
+# Add a mapping with name and optional description for each canonical Theme.
+themes: []

@@ -26,6 +26,7 @@ dist/
 .env
 .env.*
 !.env.example
+recovery-codes.txt
 
 # Generated market data and result files
 data/**/*.csv

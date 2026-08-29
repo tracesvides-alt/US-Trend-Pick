@@ -14,11 +14,22 @@ import numpy as np
 import pandas as pd
 
 from engine.dates import measurement_date
-from engine.portfolio.theme import ThemeRecord, active_theme_map, load_theme_history
+from engine.portfolio.theme import (
+    DEFAULT_THEME_CATALOG_PATH,
+    ThemeRecord,
+    active_theme_map,
+    load_theme_history,
+)
+from engine.portfolio.theme_review import (
+    build_theme_review,
+    write_theme_review_output,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_TACTICAL_DIR = PROJECT_ROOT / "data" / "results"
 DEFAULT_PORTFOLIO_DIR = PROJECT_ROOT / "data" / "portfolio"
+DEFAULT_UNIVERSE_DIR = PROJECT_ROOT / "data" / "universe"
+DEFAULT_RESULTS_DIR = PROJECT_ROOT / "data" / "results"
 DEFAULT_THEME_PATH = PROJECT_ROOT / "config" / "theme_history.yaml"
 TARGET_HOLDINGS = 10
 TARGET_WEIGHT = 0.10
@@ -128,15 +139,6 @@ def _portfolio_record(
     }
 
 
-def _review_item(row: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "ticker": str(row.get("ticker", "")).strip().upper(),
-        "tactical_rank": _rank(row.get("tactical_rank")),
-        "theme": None,
-        "reason": "THEME_REVIEW_REQUIRED",
-    }
-
-
 def _previous_map(previous: list[dict[str, Any]] | pd.DataFrame | None) -> dict[str, dict[str, Any]]:
     if previous is None:
         return {}
@@ -158,9 +160,11 @@ def build_portfolio(
     previous_portfolio: list[dict[str, Any]] | pd.DataFrame | None = None,
     target_holdings: int = TARGET_HOLDINGS,
     target_weight: float = TARGET_WEIGHT,
+    universe: pd.DataFrame | None = None,
 ) -> PortfolioBuildResult:
     """Build a weekly portfolio without changing ranking calculations."""
 
+    theme_review = build_theme_review(tactical_ranking, universe, theme_map)
     candidates = tactical_ranking.to_dict("records")
     for row in candidates:
         ticker = str(row.get("ticker", "")).strip().upper()
@@ -197,6 +201,7 @@ def build_portfolio(
         selected_tickers = {row["ticker"] for row in selected}
         rotations.extend(_portfolio_record(row, row["theme"], "Rotation", 0.0) for row in excess)
 
+    unclassified_candidate = False
     for row in candidates:
         if len(selected) >= target_holdings:
             break
@@ -204,17 +209,13 @@ def build_portfolio(
         if ticker in selected_tickers or _is_stage4(row) or not _as_bool(row.get("new_buy")):
             continue
         if row["theme"] is None:
+            unclassified_candidate = True
             continue
         if not theme_constraint_ok(row, selected, candidates):
             continue
         selected.append(row)
         selected_tickers.add(ticker)
 
-    top20_unclassified = [
-        _review_item(row)
-        for row in candidates
-        if (_rank(row.get("tactical_rank")) or float("inf")) <= 20 and row["theme"] is None
-    ]
     holdings: list[dict[str, Any]] = []
     for row in sorted(selected, key=lambda value: _rank(value.get("tactical_rank")) or float("inf")):
         status = "THEME_REVIEW_REQUIRED" if row["theme"] is None else (
@@ -223,16 +224,19 @@ def build_portfolio(
         )
         holdings.append(_portfolio_record(row, row["theme"], status, target_weight))
     holdings.extend(rotations)
+    review_required = unclassified_candidate or any(
+        row["theme"] is None for row in selected
+    )
     status = (
         "THEME_REVIEW_REQUIRED"
-        if top20_unclassified or any(row["theme"] is None for row in selected)
+        if review_required
         else "CONFIRMED"
         if len(selected) == target_holdings
         else "PORTFOLIO_INCOMPLETE"
     )
     return PortfolioBuildResult(
         holdings=holdings,
-        theme_review=top20_unclassified,
+        theme_review=theme_review,
         portfolio_status=status,
         selected_count=len(selected),
         rotation_count=len(rotations),
@@ -288,8 +292,11 @@ def write_portfolio_output(
 def run_portfolio_builder(
     tactical_path: str | Path | None = None,
     theme_path: str | Path = DEFAULT_THEME_PATH,
+    theme_catalog_path: str | Path = DEFAULT_THEME_CATALOG_PATH,
     previous_path: str | Path | None = None,
     portfolio_dir: str | Path = DEFAULT_PORTFOLIO_DIR,
+    universe_path: str | Path | None = None,
+    results_dir: str | Path = DEFAULT_RESULTS_DIR,
     as_of: date | None = None,
 ) -> tuple[PortfolioBuildResult, Path]:
     """Build the portfolio from the latest Tactical Ranking snapshot."""
@@ -299,13 +306,25 @@ def run_portfolio_builder(
         DEFAULT_TACTICAL_DIR, "tactical-*.csv"
     )
     tactical = pd.read_csv(tactical_file)
-    records: list[ThemeRecord] = load_theme_history(theme_path)
+    records: list[ThemeRecord] = load_theme_history(theme_path, theme_catalog_path)
     themes = active_theme_map(records, output_date)
     if previous_path is None:
         previous_file = _previous_portfolio_path(output_date, portfolio_dir)
     else:
         previous_file = Path(previous_path)
-    result = build_portfolio(tactical, themes, _load_previous(previous_file))
+    universe_file = (
+        Path(universe_path)
+        if universe_path is not None
+        else _latest_file(DEFAULT_UNIVERSE_DIR, "*.csv")
+    )
+    universe = pd.read_csv(universe_file)
+    result = build_portfolio(
+        tactical,
+        themes,
+        _load_previous(previous_file),
+        universe=universe,
+    )
+    write_theme_review_output(result.theme_review, results_dir)
     return result, write_portfolio_output(result, output_date, portfolio_dir)
 
 

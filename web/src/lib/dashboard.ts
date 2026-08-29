@@ -36,6 +36,20 @@ export type PortfolioRow = {
   weekly?: NullableNumber;
 };
 
+export type ThemeReviewRow = {
+  ticker: string;
+  company_name?: string | null;
+  tactical_rank?: NullableNumber;
+  base_rank?: NullableNumber;
+  sector?: string | null;
+  industry?: string | null;
+  current_theme?: string | null;
+  required?: boolean;
+  status?: string;
+  note?: string | null;
+  reason?: string;
+};
+
 export type RankChange = {
   ticker: string;
   previousRank?: NullableNumber;
@@ -69,11 +83,7 @@ export type ResultDocument = {
     regime_data_status: string;
   };
   portfolioStatus: string;
-  themeReview: Array<{
-    ticker: string;
-    tactical_rank?: NullableNumber;
-    reason?: string;
-  }>;
+  themeReview: ThemeReviewRow[];
   portfolio: PortfolioRow[];
   baseRanking: RankRow[];
   tacticalRanking: TacticalRow[];
@@ -123,6 +133,7 @@ export function formatStatus(status: string | null | undefined): string {
     CONFIRMED: "確定",
     RANKING_OFFICIAL_PORTFOLIO_PENDING: "採用銘柄確認待ち",
     THEME_REVIEW_REQUIRED: "テーマ確認待ち",
+    THEME_SET: "設定済み",
     PORTFOLIO_INCOMPLETE: "採用銘柄未確定",
     COMPLETE: "完全",
     UNKNOWN: "不明",
@@ -141,6 +152,10 @@ export function getTacticalStatus(row: TacticalRow): string {
 
 export function activePortfolio(rows: PortfolioRow[]): PortfolioRow[] {
   return rows.filter((row) => (numberOrNull(row.weight) ?? 0) > 0);
+}
+
+export function isThemeReviewRequired(row: ThemeReviewRow): boolean {
+  return row.required ?? row.current_theme == null;
 }
 
 export function regimeScore(regime: Record<string, unknown>): number | null {

@@ -176,5 +176,7 @@ def test_written_history_and_latest_are_schema_valid(tmp_path) -> None:
     assert latest_path.name == "latest.json"
     history = json.loads(history_path.read_text(encoding="utf-8"))
     latest = json.loads(latest_path.read_text(encoding="utf-8"))
+    theme_review = json.loads((tmp_path / "theme-review.json").read_text(encoding="utf-8"))
     ResultDocument.model_validate(history)
     assert latest == history
+    assert theme_review == []

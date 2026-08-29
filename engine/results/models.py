@@ -39,14 +39,29 @@ class PortfolioRecord(BaseModel):
 
 
 class ThemeReviewRecord(BaseModel):
-    """A Tactical Top20 candidate that has no active Theme mapping."""
+    """Theme coverage for one of the Tactical Top30 rows."""
 
     model_config = ConfigDict(extra="allow")
 
     ticker: str = Field(min_length=1)
+    company_name: str | None = None
     tactical_rank: float | None = None
-    theme: str | None = None
-    reason: str = Field(min_length=1)
+    base_rank: float | None = None
+    sector: str | None = None
+    industry: str | None = None
+    current_theme: str | None = None
+    required: bool = True
+    status: str = Field(default="THEME_REVIEW_REQUIRED", min_length=1)
+    note: str | None = None
+
+    @model_validator(mode="after")
+    def validate_theme_state(self) -> "ThemeReviewRecord":
+        if self.required:
+            if self.current_theme is not None or self.status != "THEME_REVIEW_REQUIRED":
+                raise ValueError("Theme Review required rows must have no current Theme")
+        elif self.current_theme is None or self.status != "THEME_SET":
+            raise ValueError("Theme Review configured rows must have a current Theme")
+        return self
 
 
 class DataHealth(BaseModel):

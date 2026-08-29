@@ -103,6 +103,7 @@ jobs:
           set -euo pipefail
           python -m engine.results.builder
           test -s data/results/latest.json
+          test -s data/results/theme-review.json
           mkdir -p web/public/data
           cp data/results/latest.json web/public/data/latest.json
 

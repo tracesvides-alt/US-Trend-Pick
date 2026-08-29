@@ -1,1 +1,3 @@
+# Each record requires ticker, theme, effective_from, and optional effective_to/note.
+# theme must match a name declared in config/themes.yaml.
 themes: []
