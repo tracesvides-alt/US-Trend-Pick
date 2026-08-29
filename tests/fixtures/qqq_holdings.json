@@ -1,0 +1,18 @@
+{
+  "data": {
+    "totalrecords": 2,
+    "date": "Aug 27, 2026",
+    "data": {
+      "rows": [
+        {
+          "symbol": "AAPL",
+          "companyName": "Apple Inc. Common Stock"
+        },
+        {
+          "symbol": "MSFT",
+          "companyName": "Microsoft Corporation Common Stock"
+        }
+      ]
+    }
+  }
+}

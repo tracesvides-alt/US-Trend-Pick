@@ -1,0 +1,178 @@
+name: Weekly Ranking
+
+on:
+  schedule:
+    - cron: "17 23 * * 5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: weekly-ranking-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  weekly-ranking:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python Setup 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Restore Cache
+        id: restore-market-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: data/market_data
+          key: market-data-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            market-data-${{ runner.os }}-
+
+      - name: Universe
+        run: |
+          set -euo pipefail
+          python -m engine.universe.builder
+
+      - name: Market Data
+        run: |
+          set -euo pipefail
+          python -m engine.market_data.cache
+
+      - name: Validation
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          metadata_path = Path("data/market_data/metadata.json")
+          if not metadata_path.exists():
+              raise SystemExit("Validation failed: metadata.json was not generated")
+          metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+          print(f"As Of: {metadata.get('as_of', 'UNKNOWN')}")
+          print(f"Universe Count: {metadata.get('universe_count', 'UNKNOWN')}")
+          print(f"Data success: {metadata.get('download_success', 'UNKNOWN')}")
+          print(f"Data failure: {metadata.get('failure_count', 'UNKNOWN')}")
+          print(f"Data status: {metadata.get('data_status', 'UNKNOWN')}")
+          if metadata.get("failure_count", 0) > 0:
+              raise SystemExit("Validation failed: one or more Universe downloads failed")
+          required_benchmarks = {"sp500", "nasdaq100"}
+          selected_benchmarks = set(metadata.get("benchmark_sources", {}))
+          if not required_benchmarks.issubset(selected_benchmarks):
+              raise SystemExit("Validation failed: required benchmark source is missing")
+          if not Path("data/market_data/prices.parquet").exists():
+              raise SystemExit("Validation failed: prices.parquet was not generated")
+          PY
+
+      - name: Base
+        run: |
+          set -euo pipefail
+          python -m engine.ranking.base
+
+      - name: Regime
+        run: |
+          set -euo pipefail
+          python -m engine.ranking.regime
+
+      - name: Tactical
+        run: |
+          set -euo pipefail
+          python -m engine.ranking.tactical
+
+      - name: Portfolio
+        run: |
+          set -euo pipefail
+          python -m engine.portfolio.builder
+
+      - name: Generate JSON
+        run: |
+          set -euo pipefail
+          python -m engine.results.builder
+          test -s data/results/latest.json
+          mkdir -p web/public/data
+          cp data/results/latest.json web/public/data/latest.json
+
+      - name: pytest
+        run: |
+          set -euo pipefail
+          pytest
+
+      - name: ruff
+        run: |
+          set -euo pipefail
+          ruff check .
+
+      - name: Node Setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Frontend Build
+        run: |
+          set -euo pipefail
+          cd web
+          npm ci
+          npm run check
+
+      - name: Vercel Deploy
+        if: success()
+        working-directory: web
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          test -n "$VERCEL_TOKEN"
+          test -n "$VERCEL_ORG_ID"
+          test -n "$VERCEL_PROJECT_ID"
+          npx --yes vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID"
+          npx --yes vercel@latest build --prod --token="$VERCEL_TOKEN"
+          npx --yes vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+
+      - name: Pipeline Summary
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          metadata = {}
+          metadata_path = Path("data/market_data/metadata.json")
+          if metadata_path.exists():
+              metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+          result = {}
+          result_path = Path("data/results/latest.json")
+          if result_path.exists():
+              result = json.loads(result_path.read_text(encoding="utf-8"))
+          print(f"As Of: {result.get('asOf', metadata.get('as_of', 'NOT_GENERATED'))}")
+          print(f"Universe Count: {metadata.get('universe_count', 'UNKNOWN')}")
+          print(f"Data success: {metadata.get('download_success', 'UNKNOWN')}")
+          print(f"Data failure: {metadata.get('failure_count', 'UNKNOWN')}")
+          print(f"Ranking status: {result.get('status', 'NOT_GENERATED')}")
+          if result:
+              print(f"Portfolio status: {result.get('portfolioStatus', 'UNKNOWN')}")
+          PY
+
+      - name: Save Cache
+        if: success()
+        uses: actions/cache/save@v4
+        with:
+          path: data/market_data
+          key: market-data-${{ runner.os }}-${{ github.run_id }}
