@@ -48,10 +48,11 @@ def test_weekly_workflow_runs_pipeline_in_order_and_deploys_after_checks() -> No
     assert "data/themes/history.json" in text
     assert "failure_count" in text
     assert "if: success()" in text
-    assert 'cd "$GITHUB_WORKSPACE/web"' in text
-    assert "npx --yes vercel@latest pull" in text
+    assert 'cd "$GITHUB_WORKSPACE"' in text
+    assert 'npx --yes vercel@latest pull' in text
+    assert '--project="$VERCEL_PROJECT_ID"' in text
     assert "mkdir -p .vercel/output/static" in text
-    assert "cp -R dist/. .vercel/output/static/" in text
+    assert "cp -R web/dist/. .vercel/output/static/" in text
     assert '{"version":3}' in text
     assert "test -s .vercel/output/static/index.html" in text
     assert "npx --yes vercel@latest build --prod" not in text
