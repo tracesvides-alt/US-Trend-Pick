@@ -11,30 +11,32 @@ themes:
     description: Networking, switching, Ethernet, and connectivity for AI systems
   - name: ASIC / Custom Silicon
     description: ASIC, custom chips, and dedicated AI accelerators
-  - name: AI Server
-    description: AI servers, GPU systems, and compute platforms
+  - name: AI Server / Compute
+    description: AI servers, GPU systems, and on-premises compute systems
   - name: Semiconductor Equipment
     description: Semiconductor manufacturing equipment and process tools
-  - name: Foundry / CPU
-    description: Foundries, CPUs, processors, and semiconductor manufacturing
-  - name: Data Center Power
-    description: Power management, UPS, cooling, and thermal systems for data centers
-  - name: Cloud / AI Infrastructure
-    description: Cloud computing, data centers, and AI infrastructure software
+  - name: Foundry / CPU / GPU
+    description: Foundries, CPUs, GPUs, processors, and chip design
+  - name: Data Center Power / Cooling
+    description: Power distribution, UPS, cooling, and thermal systems for data centers
+  - name: AI Cloud / Compute Infrastructure
+    description: GPU cloud, AI compute capacity, and GPU-as-a-Service providers
+  - name: Cybersecurity
+    description: Cybersecurity, identity, endpoint, and threat protection
+  - name: Enterprise Software / AI Software
+    description: Enterprise applications, SaaS, and software products
   - name: Nuclear
     description: Nuclear power, uranium, and reactor technologies
-  - name: Utilities
-    description: Electric, regulated, and other utility businesses
+  - name: Utilities / Grid
+    description: Electric utilities, regulated utilities, and grid infrastructure
   - name: Energy
     description: Oil, gas, refining, and broader energy producers
   - name: Financials
     description: Banks, insurance, asset management, and financial services
   - name: FinTech
     description: Digital payments and financial technology platforms
-  - name: Cybersecurity
-    description: Cybersecurity, identity, endpoint, and threat protection
-  - name: Robotics
-    description: Robotics, automation, and autonomous industrial systems
+  - name: Robotics / Automation
+    description: Robotics, factory automation, and autonomous industrial systems
   - name: Defense
     description: Defense, military, and aerospace defense systems
   - name: Space

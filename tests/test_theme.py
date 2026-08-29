@@ -4,6 +4,7 @@ import json
 from datetime import date
 
 import pandas as pd
+import pytest
 
 from engine.theme.classifier import (
     classify_company,
@@ -29,8 +30,112 @@ def test_theme_master_contains_only_fixed_classifier_names() -> None:
     names = {definition.name for definition in definitions}
 
     assert "AI Memory / HBM" in names
+    assert "AI Cloud / Compute Infrastructure" in names
+    assert "Enterprise Software / AI Software" in names
     assert "Other" in names
-    assert len(names) == 26
+    assert len(names) == 27
+
+
+@pytest.mark.parametrize(
+    ("ticker", "profile", "expected_theme"),
+    [
+        (
+            "LITE",
+            CompanyProfile(
+                ticker="LITE",
+                sector="Technology",
+                industry="Communication Equipment",
+                product_service="Optical transceivers and coherent optical components",
+                business_summary="Photonics and optical communication products",
+            ),
+            "Optical / Photonics",
+        ),
+        (
+            "COHR",
+            CompanyProfile(
+                ticker="COHR",
+                sector="Technology",
+                industry="Communication Equipment",
+                product_service="Lasers, photonics, optical components, and transceivers",
+                business_summary="Optical communications and coherent photonics",
+            ),
+            "Optical / Photonics",
+        ),
+        (
+            "CRWD",
+            CompanyProfile(
+                ticker="CRWD",
+                sector="Technology",
+                industry="Software - Infrastructure",
+                product_service="Endpoint security and threat detection platform",
+                business_summary="Cybersecurity, threat intelligence, and security operations",
+            ),
+            "Cybersecurity",
+        ),
+        (
+            "CRDO",
+            CompanyProfile(
+                ticker="CRDO",
+                sector="Technology",
+                industry="Semiconductors",
+                product_service="Networking silicon, SerDes, Ethernet connectivity, and DSP",
+                business_summary="High-speed interconnect and data center networking solutions",
+            ),
+            "AI Networking",
+        ),
+        (
+            "MU",
+            CompanyProfile(
+                ticker="MU",
+                sector="Technology",
+                industry="Semiconductors",
+                product_service="DRAM, HBM, and AI memory chips",
+                business_summary="Memory and storage products including DRAM and NAND",
+            ),
+            "AI Memory / HBM",
+        ),
+        (
+            "SNDK",
+            CompanyProfile(
+                ticker="SNDK",
+                sector="Technology",
+                industry="Data Storage",
+                product_service="NAND flash memory and solid-state drives",
+                business_summary="Data storage and flash memory solutions",
+            ),
+            "NAND / Storage",
+        ),
+        (
+            "NBIS",
+            CompanyProfile(
+                ticker="NBIS",
+                sector="Technology",
+                industry="Cloud Computing",
+                product_service="GPU cloud, AI compute capacity, and GPU-as-a-Service",
+                business_summary="AI cloud platform for hyperscale compute infrastructure",
+            ),
+            "AI Cloud / Compute Infrastructure",
+        ),
+        (
+            "VRT",
+            CompanyProfile(
+                ticker="VRT",
+                sector="Industrials",
+                industry="Electrical Equipment & Parts",
+                product_service="Data center power distribution, UPS, thermal management, and cooling",
+                business_summary="Power and cooling systems for critical digital infrastructure",
+            ),
+            "Data Center Power / Cooling",
+        ),
+    ],
+)
+def test_classification_sanity_fixture(ticker, profile, expected_theme) -> None:
+    result = classify_company(profile, _definitions(), date(2026, 8, 28))
+
+    assert result.ticker == ticker
+    assert result.primary_theme == expected_theme
+    assert result.primary_theme != "AI Cloud / Compute Infrastructure" or ticker == "NBIS"
+    assert result.theme_score > result.second_theme_score
 
 
 def test_keyword_classifier_prefers_high_priority_profile_evidence() -> None:
@@ -50,6 +155,43 @@ def test_keyword_classifier_prefers_high_priority_profile_evidence() -> None:
     assert result.theme_score > result.second_theme_score
     assert result.proposed_theme == result.primary_theme
     assert result.confidence in {"HIGH", "MEDIUM", "LOW"}
+
+
+def test_generic_ai_cloud_end_market_terms_do_not_create_cloud_theme() -> None:
+    result = classify_company(
+        CompanyProfile(
+            ticker="GENERIC",
+            sector="Technology",
+            industry="Software - Infrastructure",
+            business_summary=(
+                "A digital transformation platform serving AI, cloud, data center, "
+                "and infrastructure customers"
+            ),
+            end_market="AI cloud infrastructure demand",
+        ),
+        _definitions(),
+        date(2026, 8, 28),
+    )
+
+    assert result.primary_theme == "Enterprise Software / AI Software"
+    assert result.primary_theme != "AI Cloud / Compute Infrastructure"
+
+
+def test_product_service_signal_beats_generic_end_market_signal() -> None:
+    result = classify_company(
+        CompanyProfile(
+            ticker="PRODUCT",
+            sector="Technology",
+            industry="Communication Equipment",
+            product_service="Optical transceivers and coherent photonics",
+            business_summary="Serves AI cloud data center infrastructure demand",
+            end_market="AI cloud infrastructure",
+        ),
+        _definitions(),
+        date(2026, 8, 28),
+    )
+
+    assert result.primary_theme == "Optical / Photonics"
 
 
 def test_sector_industry_fallback_and_other_are_master_values() -> None:

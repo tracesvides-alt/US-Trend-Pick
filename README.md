@@ -25,8 +25,9 @@ S&P 500、NASDAQ-100、Nasdaq Next Generation 100の構成銘柄を対象に、�
   - Relative Strength、RS Drawdown、移動平均、Stage 4判定
   - YTD、MTD、Weeklyリターン
 - Primary Theme自動判定
-  - Company Sector、Industry、Business Summary、Company Name、過去判定を入力
-  - 固定Theme Master、Keyword Score、Confidence、Other fallback
+  - Product / Service、Industry、Business Summary、Sector、End Marketの順に評価
+  - 固定27 Theme Master、ドメイン固有Keyword、Confidence、Other fallback
+  - AI / Cloud / Data Centerなどの汎用語だけではThemeを確定しない
   - 2回連続の週次判定でのみThemeを変更
 - Theme Constraintを適用した10銘柄Portfolio Builder
 - Pydanticで検証したFrontend用単一JSON
@@ -148,7 +149,9 @@ Tactical Ranking → Primary Theme自動判定 → Theme Constraint → Portfoli
 
 `config/themes.yaml`はClassifierが出力できるPrimary Themeの固定Masterです。ClassifierはMaster外の新しいTheme名を生成せず、判定材料が少ない場合は必ず`Other`へ分類します。
 
-判定には無料のCompany Profile情報を使用します。優先順位はSector、Industry、Business Summary、Company Name、過去Themeです。Yahoo Financeから取得したProfileは`data/themes/company-profiles.json`へCacheします。
+判定には無料のCompany Profile情報を使用します。優先順位はProduct / Service、Industry、Business Summary、Sector、End Marketです。会社名と過去Themeは補助情報に留めます。Yahoo Financeから取得したProfileは`data/themes/company-profiles.json`へCacheします。
+
+`AI Cloud / Compute Infrastructure`はGPU Cloud、AI Compute Capacity、GPU-as-a-Serviceなど、計算資源そのものを提供する企業に限定します。AI Data Center向けの光学部品、Networking、Memory、Power、Security製品を販売する企業は、それぞれの製品Themeを優先します。
 
 各銘柄について、`primary_theme`、`theme_score`、`second_theme`、`second_theme_score`、`confidence`（`HIGH` / `MEDIUM` / `LOW`）を保存します。Confidenceが`LOW`でもPortfolioを停止せず、最高ScoreのThemeを暫定Primary Themeとして使用します。
 

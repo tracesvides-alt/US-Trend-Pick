@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date
 from pathlib import Path
@@ -25,7 +26,9 @@ from engine.theme.history import (
     write_theme_artifacts,
 )
 from engine.theme.keywords import (
+    GENERIC_KEYWORDS,
     INDUSTRY_THEME_WEIGHTS,
+    canonical_theme_name,
     SECTOR_THEME_WEIGHTS,
     SOURCE_WEIGHTS,
     THEME_KEYWORDS,
@@ -120,11 +123,21 @@ def _profile_from_row(row: Any, ticker: str) -> CompanyProfile:
             or values.get("shortName")
         )
         or None,
+        product_service=_text(
+            values.get("product_service")
+            or values.get("products_services")
+            or values.get("product")
+        )
+        or None,
         sector=_text(values.get("sector")) or None,
         industry=_text(values.get("industry")) or None,
         business_summary=_text(
-            values.get("business_summary") or values.get("longBusinessSummary")
+            values.get("business_summary")
+            or values.get("business_description")
+            or values.get("longBusinessSummary")
         )
+        or None,
+        end_market=_text(values.get("end_market") or values.get("customer_demand"))
         or None,
     )
 
@@ -135,12 +148,17 @@ def _profile_from_yahoo(ticker: str) -> CompanyProfile:
     info = get_info() if callable(get_info) else yahoo_ticker.info
     if not isinstance(info, dict):
         info = {}
+    product_service = info.get("productsAndServices") or info.get("productService")
+    if isinstance(product_service, (list, tuple, set)):
+        product_service = " ".join(_text(item) for item in product_service)
     return CompanyProfile(
         ticker=ticker,
         company_name=_text(info.get("longName") or info.get("shortName")) or None,
+        product_service=_text(product_service) or None,
         sector=_text(info.get("sector")) or None,
         industry=_text(info.get("industry")) or None,
         business_summary=_text(info.get("longBusinessSummary")) or None,
+        end_market=_text(info.get("endMarket") or info.get("customerDemand")) or None,
     )
 
 
@@ -203,9 +221,11 @@ def fetch_company_profiles(
             base = base.model_copy(
                 update={
                     "company_name": base.company_name or previous.company_name,
+                    "product_service": base.product_service or previous.product_service,
                     "sector": base.sector or previous.sector,
                     "industry": base.industry or previous.industry,
                     "business_summary": base.business_summary or previous.business_summary,
+                    "end_market": base.end_market or previous.end_market,
                 }
             )
         profiles[ticker] = base
@@ -230,10 +250,12 @@ def fetch_company_profiles(
                     profiles[ticker] = current.model_copy(
                         update={
                             "company_name": fetched.company_name or current.company_name,
+                            "product_service": fetched.product_service or current.product_service,
                             "sector": fetched.sector or current.sector,
                             "industry": fetched.industry or current.industry,
                             "business_summary": fetched.business_summary
                             or current.business_summary,
+                            "end_market": fetched.end_market or current.end_market,
                         }
                     )
                 except Exception as exc:  # noqa: BLE001 - one profile must not stop the run
@@ -242,20 +264,35 @@ def fetch_company_profiles(
     return profiles, failures
 
 
+def _keyword_pattern(keyword: str) -> str:
+    tokens = re.findall(r"[a-z0-9]+", keyword.casefold())
+    return r"(?<!\w)" + r"[\s\-/&]+".join(map(re.escape, tokens)) + r"(?!\w)"
+
+
+def _contains_keyword(normalized_text: str, keyword: str) -> bool:
+    return bool(re.search(_keyword_pattern(keyword), normalized_text))
+
+
 def _add_mapping_scores(
     scores: dict[str, float],
+    hits: dict[str, list[str]],
     mapping: dict[str, dict[str, float]],
     text: str,
     source: str,
-) -> None:
+) -> bool:
     normalized = _norm(text)
     if not normalized:
-        return
+        return False
+    specific_evidence = False
     for phrase, theme_weights in mapping.items():
-        if phrase in normalized:
-            source_weight = SOURCE_WEIGHTS[source]
-            for theme, weight in theme_weights.items():
-                scores[theme] += weight * source_weight
+        if not _contains_keyword(normalized, phrase):
+            continue
+        source_weight = SOURCE_WEIGHTS[source]
+        for theme, weight in theme_weights.items():
+            scores[theme] += weight * source_weight
+            hits.setdefault(theme, []).append(f"{source}:{phrase}")
+            specific_evidence = specific_evidence or weight >= 5
+    return specific_evidence
 
 
 def _confidence(
@@ -277,41 +314,61 @@ def classify_company(
     as_of: Any,
     previous_theme: str | None = None,
 ) -> ThemeClassification:
-    """Score every master Theme using profile fields in priority order."""
+    """Score every master Theme from what the company sells or provides.
+
+    Product/service evidence is strongest, followed by industry, business
+    description, sector, and end-market hints. Broad demand terms such as
+    ``AI`` and ``data center`` are intentionally unable to classify a company
+    without a domain-specific product or industry signal.
+    """
 
     names = [definition.name for definition in definitions]
     scores = {name: 0.0 for name in names}
     hits: dict[str, list[str]] = {}
-    fields = {
-        "sector": profile.sector,
-        "industry": profile.industry,
-        "business_summary": profile.business_summary,
-        "company_name": profile.company_name,
-    }
-    for source, value in fields.items():
+    fields = (
+        ("product_service", profile.product_service),
+        ("industry", profile.industry),
+        ("business_summary", profile.business_summary),
+        ("sector", profile.sector),
+        ("end_market", profile.end_market),
+        ("company_name", profile.company_name),
+    )
+    specific_evidence = False
+    for source, value in fields:
         normalized = _norm(value)
         if not normalized:
             continue
         for theme, keywords in THEME_KEYWORDS.items():
             for keyword, weight in keywords.items():
-                if _norm(keyword) in normalized:
+                if _contains_keyword(normalized, keyword):
                     scores[theme] += weight * SOURCE_WEIGHTS[source]
                     hits.setdefault(theme, []).append(f"{source}:{keyword}")
-    _add_mapping_scores(scores, SECTOR_THEME_WEIGHTS, profile.sector or "", "sector")
-    _add_mapping_scores(scores, INDUSTRY_THEME_WEIGHTS, profile.industry or "", "industry")
+                    if keyword not in GENERIC_KEYWORDS and weight >= 8:
+                        specific_evidence = True
+    specific_evidence = _add_mapping_scores(
+        scores, hits, INDUSTRY_THEME_WEIGHTS, profile.industry or "", "industry"
+    ) or specific_evidence
+    specific_evidence = _add_mapping_scores(
+        scores, hits, SECTOR_THEME_WEIGHTS, profile.sector or "", "sector"
+    ) or specific_evidence
 
     # The previous result is a weak prior, never a new Theme and never strong
     # enough to defeat clear current profile evidence.
+    previous_name = canonical_theme_name(previous_theme)
     previous_canonical = next(
-        (name for name in names if previous_theme and name.casefold() == previous_theme.casefold()),
+        (name for name in names if previous_name and name.casefold() == previous_name.casefold()),
         None,
     )
     if previous_canonical:
         scores[previous_canonical] += 0.5
         hits.setdefault(previous_canonical, []).append("history:previous_theme")
 
-    evidence = sum(score for score in scores.values())
-    if evidence <= 0:
+    # History is a stability prior only. It cannot turn a generic or empty
+    # profile into a new product classification.
+    if not specific_evidence:
+        scores = {name: 0.0 for name in names}
+        hits = {}
+    if sum(scores.values()) <= 0:
         other = next((name for name in names if name == "Other"), names[-1])
         scores[other] = 1.0
         hits.setdefault(other, []).append("fallback:Other")

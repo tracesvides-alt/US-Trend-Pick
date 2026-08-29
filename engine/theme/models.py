@@ -25,9 +25,11 @@ class CompanyProfile(BaseModel):
 
     ticker: str = Field(min_length=1)
     company_name: str | None = None
+    product_service: str | None = None
     sector: str | None = None
     industry: str | None = None
     business_summary: str | None = None
+    end_market: str | None = None
 
 
 class ThemeClassification(BaseModel):

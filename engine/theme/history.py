@@ -16,6 +16,7 @@ from engine.theme.models import (
     ThemeHistoryRecord,
     ThemeRunResult,
 )
+from engine.theme.keywords import canonical_theme_name
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -64,10 +65,30 @@ def load_theme_snapshot(path: str | Path) -> list[ThemeClassification]:
     if not snapshot_path.exists():
         return []
     payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
-    return [
-        ThemeClassification.model_validate(row)
-        for row in _list_payload(payload, "classifications")
-    ]
+    return [_canonicalize_classification(row) for row in _list_payload(payload, "classifications")]
+
+
+def _canonicalize_classification(row: dict[str, Any] | ThemeClassification) -> ThemeClassification:
+    classification = (
+        row
+        if isinstance(row, ThemeClassification)
+        else ThemeClassification.model_validate(row)
+    )
+    scores: dict[str, float] = {}
+    for theme, score in classification.theme_scores.items():
+        canonical = canonical_theme_name(theme) or theme
+        scores[canonical] = max(scores.get(canonical, 0.0), float(score))
+    return classification.model_copy(
+        update={
+            "primary_theme": canonical_theme_name(classification.primary_theme)
+            or classification.primary_theme,
+            "second_theme": canonical_theme_name(classification.second_theme)
+            or classification.second_theme,
+            "proposed_theme": canonical_theme_name(classification.proposed_theme),
+            "previous_theme": canonical_theme_name(classification.previous_theme),
+            "theme_scores": scores,
+        }
+    )
 
 
 def _dated_files(theme_dir: str | Path, as_of: date | None = None) -> list[Path]:
@@ -113,7 +134,15 @@ def active_theme_history_map(
     if overlapping:
         tickers = ", ".join(sorted(overlapping))
         raise ValueError(f"overlapping automatic Theme history records: {tickers}")
-    return {ticker: rows[0] for ticker, rows in active.items()}
+    return {
+        ticker: rows[0].model_copy(
+            update={
+                "primary_theme": canonical_theme_name(rows[0].primary_theme)
+                or rows[0].primary_theme
+            }
+        )
+        for ticker, rows in active.items()
+    }
 
 
 def _finite(value: Any) -> bool:
