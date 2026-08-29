@@ -229,6 +229,46 @@ def test_profile_download_is_mockable_and_uses_universe_fallback(tmp_path) -> No
     assert profiles["AAA"].industry == "Oil & Gas E&P"
 
 
+def test_legacy_profile_cache_is_refreshed_after_classifier_schema_change(tmp_path) -> None:
+    cache_path = tmp_path / "profiles.json"
+    cache_path.write_text(
+        json.dumps(
+            [
+                {
+                    "ticker": "AAA",
+                    "company_name": "Example Corp",
+                    "sector": "Technology",
+                    "industry": "Software - Infrastructure",
+                    "business_summary": "Old cached summary",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    universe = pd.DataFrame([{"ticker": "AAA"}])
+    calls: list[str] = []
+
+    def fake_fetcher(ticker: str) -> CompanyProfile:
+        calls.append(ticker)
+        return CompanyProfile(
+            ticker=ticker,
+            product_service="Endpoint security",
+            sector="Technology",
+            industry="Software - Infrastructure",
+            business_summary="Security software",
+        )
+
+    profiles, failures = fetch_company_profiles(
+        ["AAA"], universe, cache_path, fetcher=fake_fetcher
+    )
+
+    assert failures == {}
+    assert calls == ["AAA"]
+    assert profiles["AAA"].product_service == "Endpoint security"
+    payload = json.loads(cache_path.read_text(encoding="utf-8"))
+    assert payload["version"] == 2
+
+
 def _classification(
     ticker: str,
     primary: str,
@@ -274,6 +314,23 @@ def test_theme_change_requires_two_consecutive_snapshots() -> None:
     ]
     assert changes[0].previous_theme == "Energy"
     assert changes[0].new_theme == "AI Networking"
+
+
+def test_legacy_broad_cloud_assignment_is_reclassified_immediately() -> None:
+    old = ThemeHistoryRecord(
+        ticker="LITE",
+        primary_theme="Cloud / AI Infrastructure",
+        effective_from=date(2026, 8, 1),
+    )
+    current = _classification(
+        "LITE", "Optical / Photonics", "Optical / Photonics", date(2026, 8, 29)
+    )
+
+    fixed = stabilize_classifications([current], [old], {}, date(2026, 8, 29))[0]
+
+    assert fixed.primary_theme == "Optical / Photonics"
+    assert fixed.theme_changed is True
+    assert fixed.change_reason == "LEGACY_THEME_RECLASSIFICATION"
 
 
 def test_theme_snapshot_is_point_in_time_and_history_is_persisted(tmp_path) -> None:

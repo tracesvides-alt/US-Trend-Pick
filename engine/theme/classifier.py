@@ -49,6 +49,7 @@ DEFAULT_RESULTS_DIR = PROJECT_ROOT / "data" / "results"
 DEFAULT_PROFILE_CACHE_PATH = DEFAULT_THEME_DIR / "company-profiles.json"
 DEFAULT_TACTICAL_DIR = DEFAULT_RESULTS_DIR
 PROFILE_WORKERS = 8
+PROFILE_CACHE_VERSION = 2
 
 
 def _text(value: Any) -> str:
@@ -162,21 +163,31 @@ def _profile_from_yahoo(ticker: str) -> CompanyProfile:
     )
 
 
-def _load_profile_cache(path: str | Path) -> dict[str, CompanyProfile]:
+def _load_profile_cache(path: str | Path) -> tuple[dict[str, CompanyProfile], int]:
     cache_path = Path(path)
     if not cache_path.exists():
-        return {}
+        return {}, 0
     payload = json.loads(cache_path.read_text(encoding="utf-8"))
-    if isinstance(payload, list):
+    if isinstance(payload, dict) and "profiles" in payload:
+        rows = payload["profiles"]
+        version = int(payload.get("version", 1))
+    elif isinstance(payload, list):
         rows = payload
+        version = 1
     elif isinstance(payload, dict):
         rows = [dict(value, ticker=key) for key, value in payload.items()]
+        version = 1
     else:
         raise ValueError("company profile cache must be a list or mapping")
-    return {
-        row.ticker: row
-        for row in (CompanyProfile.model_validate(item) for item in rows)
-    }
+    if not isinstance(rows, list):
+        raise ValueError("company profile cache profiles must be a list")
+    return (
+        {
+            row.ticker: row
+            for row in (CompanyProfile.model_validate(item) for item in rows)
+        },
+        version,
+    )
 
 
 def _save_profile_cache(
@@ -188,7 +199,12 @@ def _save_profile_cache(
     temporary = cache_path.with_name(f".{cache_path.name}.tmp")
     temporary.write_text(
         json.dumps(
-            [profile.model_dump(mode="json") for profile in profiles.values()],
+            {
+                "version": PROFILE_CACHE_VERSION,
+                "profiles": [
+                    profile.model_dump(mode="json") for profile in profiles.values()
+                ],
+            },
             indent=2,
             ensure_ascii=False,
         )
@@ -207,7 +223,7 @@ def fetch_company_profiles(
 ) -> tuple[dict[str, CompanyProfile], dict[str, str]]:
     """Load cached/free Yahoo profiles and fetch missing fields in parallel."""
 
-    cached = _load_profile_cache(cache_path)
+    cached, cache_version = _load_profile_cache(cache_path)
     universe_rows = {
         str(row.get("ticker", "")).strip().upper(): row
         for row in universe.to_dict("records")
@@ -231,10 +247,14 @@ def fetch_company_profiles(
         profiles[ticker] = base
 
     get_profile = fetcher or _profile_from_yahoo
+    refresh_legacy_cache = cache_version < PROFILE_CACHE_VERSION
     pending = [
         ticker
         for ticker, profile in profiles.items()
-        if not profile.sector or not profile.industry or not profile.business_summary
+        if refresh_legacy_cache
+        or not profile.sector
+        or not profile.industry
+        or not profile.business_summary
     ]
     failures: dict[str, str] = {}
     if pending:

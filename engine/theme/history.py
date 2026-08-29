@@ -16,7 +16,10 @@ from engine.theme.models import (
     ThemeHistoryRecord,
     ThemeRunResult,
 )
-from engine.theme.keywords import canonical_theme_name
+from engine.theme.keywords import (
+    LEGACY_RECLASSIFICATION_THEMES,
+    canonical_theme_name,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -171,6 +174,7 @@ def _with_stable_theme(
     current: ThemeHistoryRecord | None,
     prior: ThemeClassification | None,
     as_of: date,
+    force_legacy_reclassification: bool = False,
 ) -> ThemeClassification:
     proposed = row.proposed_theme or row.primary_theme
     current_theme = current.primary_theme if current else None
@@ -181,6 +185,13 @@ def _with_stable_theme(
         reason = "INITIAL_CLASSIFICATION"
     elif proposed == current_theme:
         final_theme = current_theme
+    elif force_legacy_reclassification:
+        # The previous broad Cloud taxonomy is not a valid current Theme
+        # assignment after the taxonomy was narrowed. Re-evaluate it once;
+        # normal Theme changes still require two consecutive weekly wins.
+        final_theme = proposed
+        changed = True
+        reason = "LEGACY_THEME_RECLASSIFICATION"
     elif (
         prior is not None
         and prior.as_of < as_of
@@ -225,12 +236,21 @@ def stabilize_classifications(
 
     records = list(history)
     active = active_theme_history_map(records, as_of)
+    legacy_reclassification_tickers = {
+        record.ticker
+        for record in records
+        if record.primary_theme in LEGACY_RECLASSIFICATION_THEMES
+        and record.effective_from <= as_of
+        and (record.effective_to is None or as_of <= record.effective_to)
+    }
     return [
         _with_stable_theme(
             row,
             active.get(row.ticker),
             prior_snapshots.get(row.ticker),
             as_of,
+            force_legacy_reclassification=row.ticker
+            in legacy_reclassification_tickers,
         )
         for row in classifications
     ]

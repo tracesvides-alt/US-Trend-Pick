@@ -16,6 +16,12 @@ LEGACY_THEME_ALIASES: dict[str, str] = {
     "Foundry / CPU": "Foundry / CPU / GPU",
 }
 
+# The old Cloud Theme was intentionally broad (for example, it included
+# generic data-center demand language). Existing assignments under that name
+# must be re-evaluated once against the narrowed classifier instead of being
+# held by the normal two-snapshot stability rule.
+LEGACY_RECLASSIFICATION_THEMES = frozenset({"Cloud / AI Infrastructure"})
+
 
 # A domain-specific product or service term is intentionally much stronger
 # than a broad demand/end-market term. Matching is case-insensitive and each
@@ -132,9 +138,8 @@ THEME_KEYWORDS: dict[str, dict[str, float]] = {
         "ai cloud infrastructure": 44,
         "cloud compute": 40,
         "bare metal gpu": 44,
-        "compute infrastructure": 34,
-        "cloud computing": 8,
-        "machine learning platform": 8,
+        "compute infrastructure": 1,
+        "cloud computing": 1,
         # Generic demand terms are deliberately weak and cannot establish
         # classification without domain-specific evidence.
         "artificial intelligence": 1,
@@ -166,6 +171,7 @@ THEME_KEYWORDS: dict[str, dict[str, float]] = {
         "ai software": 30,
         "machine learning software": 30,
         "data analytics software": 26,
+        "machine learning platform": 26,
         "software": 12,
         "digital transformation": 1,
         "artificial intelligence": 1,
@@ -353,6 +359,8 @@ GENERIC_KEYWORDS = frozenset(
         "ai",
         "artificial intelligence",
         "cloud",
+        "cloud computing",
+        "compute infrastructure",
         "data center",
         "infrastructure",
         "digital transformation",
