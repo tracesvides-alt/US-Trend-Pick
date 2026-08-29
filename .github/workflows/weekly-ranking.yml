@@ -153,7 +153,12 @@ jobs:
           test -n "$VERCEL_PROJECT_ID"
           cd "$GITHUB_WORKSPACE/web"
           npx --yes vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID"
-          npx --yes vercel@latest build --prod --token="$VERCEL_TOKEN"
+          rm -rf .vercel/output
+          mkdir -p .vercel/output/static
+          cp -R dist/. .vercel/output/static/
+          printf '%s\n' '{"version":3}' > .vercel/output/config.json
+          test -s .vercel/output/config.json
+          test -s .vercel/output/static/index.html
           npx --yes vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
 
       - name: Pipeline Summary
