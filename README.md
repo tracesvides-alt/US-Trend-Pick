@@ -1,81 +1,70 @@
 # US Trend Pick
 
-## Phase 2: Market Data Cache
+個人利用向けの米国株トレンドランキングWebアプリです。
+S&P 500、NASDAQ-100、Nasdaq Next Generation 100の構成銘柄を対象に、同じ条件で市場データを取得し、現在の市場で相対的に強い銘柄を毎週算出します。
 
-Phase 2 downloads daily OHLC, adjusted-close equivalent, and volume data for the complete Universe in chunks via `yfinance`. The normalized long-format data is merged into a Parquet cache, with run status and benchmark source selection stored in a JSON sidecar.
+常時100%株式を前提とし、弱くなった銘柄から相対的に強い銘柄へローテーションします。現金化、証券会社APIへの接続、株式の注文機能はありません。
 
-```powershell
-python -m engine.market_data.cache
+## 機能
+
+- SPY、QQQ、QQQJの公開保有銘柄から対象Universeを取得・統合
+- `yfinance`による日足データ取得、チャンク処理、Retry、Parquet Cache
+- データ欠損・履歴不足・ベンチマーク不足の検証
+- Base Ranking
+  - 12-1M Momentum
+  - Dollar Volume Expansion
+  - 週次リターンによるBeta
+  - Cross-sectional Percentile
+- Market Regime
+  - NASDAQ100 Trend
+  - S&P500 Trend
+  - Market Breadth
+  - Strategy Leadership
+  - Volatility Regime
+- Tactical Ranking
+  - Relative Strength、RS Drawdown、移動平均、Stage 4判定
+  - YTD、MTD、Weeklyリターン
+- Theme Constraintを適用した10銘柄Portfolio Builder
+- Pydanticで検証したFrontend用単一JSON
+- 日本語中心のダークFinTech UI、モバイルBottom Navigation、ランキング検索・並べ替え
+- GitHub Actionsによる週次実行と、成功時のみ行う静的Vercel Deploy
+
+## アーキテクチャ
+
+```text
+公開Universeデータ
+        ↓
+Python Batch（取得・検証・計算）
+        ↓
+Parquet Cache / JSON / CSV
+        ↓
+Base → Market Regime → Tactical → Portfolio
+        ↓
+data/results/latest.json
+        ↓
+web/public/data/latest.json
+        ↓
+React PWA（静的表示）
 ```
 
-The batch uses `^GSPC` and `^NDX` when available, and can fall back to `SPY` and `QQQ`. A failed Universe ticker or insufficient history is retained in metadata and makes the run `INCOMPLETE`.
+ブラウザから市場データAPIへ直接アクセスしません。Frontendは生成済みの`latest.json`だけを読み込みます。データベースは使用しません。
 
-## Phase 3: Base Trend Ranking
+## ディレクトリ
 
-Phase 3 calculates 12-1M adjusted-price momentum, raw dollar-volume expansion, weekly-return beta, cross-sectional percentile scores, and the weighted Base Score for the full Universe.
-
-```powershell
-python -m engine.ranking.base
+```text
+engine/                 Pythonの取得・検証・ランキング・Portfolio処理
+config/                 Ticker AliasとTheme履歴
+data/                   実行時に生成するCache・Snapshot・結果
+tests/                  Unit Test、Parser Fixture、Golden Fixture
+web/                    React / TypeScript / Vite / PWA
+.github/workflows/      GitHub Actions
 ```
 
-The batch writes `data/results/base-YYYY-MM-DD.json` and `.csv`, prints the Top20, and reports excluded tickers by reason. Tactical Ranking, Theme, Portfolio, and Web UI are not included yet.
-
-## Phase 4: Market Regime
-
-Phase 4 reads the existing Base Ranking, price cache, and Universe source flags to calculate the weighted Market Regime components, hysteresis, and Stage 4 overrides.
-
-```powershell
-python -m engine.ranking.regime
-python -m engine.ranking.regime --previous-state WARNING
-```
-
-The result is written to `data/results/regime-YYYY-MM-DD.json`. The JSON records every component score, benchmark source, breadth ratios, stage flags, and data completeness status.
-
-## Phase 5: Tactical Ranking
-
-Phase 5 reads the existing Base Ranking and Market Regime, calculates Tactical Health, penalties, Stage 4, New Buy, and YTD/MTD/weekly returns for the full Universe.
-
-```powershell
-python -m engine.ranking.tactical
-```
-
-The batch writes `data/results/tactical-YYYY-MM-DD.json` and `.csv`, prints the Top30, and keeps data-insufficient Universe rows as unranked records rather than estimating their scores.
-
-## Phase 6: Theme and Portfolio Builder
-
-Phase 6 loads time-effective Theme records from `config/theme_history.yaml`, applies the Theme Constraint only during Portfolio construction, and reads the previous portfolio when available.
-
-```powershell
-python -m engine.portfolio.builder
-```
-
-The batch writes `data/portfolio/YYYY-MM-DD.json`. Unclassified Tactical Top20 candidates produce `THEME_REVIEW_REQUIRED`; no GitHub Issue is created automatically.
-
-## Phase 7: Frontend Result JSON and History
-
-Phase 7 combines the existing Base Ranking, Tactical Ranking, Market Regime, data-health metadata, and Portfolio output into one Pydantic-validated document. The dated history and `latest.json` are written only after validation succeeds. Weekly rank changes and Portfolio IN/OUT/HOLD transitions are calculated from the previous dated result.
-
-```powershell
-python -m engine.results.builder
-```
-
-The batch writes `data/results/YYYY-MM-DD.json` and `data/results/latest.json`. If market-data or ranking completeness is not official, the result is `INCOMPLETE`; if only Theme/Portfolio confirmation is pending, the result is `RANKING_OFFICIAL_PORTFOLIO_PENDING`.
-
-## Phase 9: Weekly GitHub Actions
-
-`.github/workflows/weekly-ranking.yml` runs the Universe, Market Data, Validation, Base, Regime, Tactical, Portfolio, unified JSON, Python tests, Ruff, and Frontend PWA build in order. It runs every Friday at 23:17 UTC (Saturday 08:17 JST) and can also be started with `workflow_dispatch`. Market-data download failures stop the job before ranking output.
-
-## Phase 10: Vercel Deploy
-
-After the ranking pipeline, tests, and Frontend build succeed, the same Workflow runs a static Vite deployment from `web/` with `vercel build` and `vercel deploy --prebuilt --prod`. Configure `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` as GitHub Actions Secrets; they are never stored in the repository. A failed step keeps the previous production deployment active.
-
-個人利用向けの米国株ランキングWebアプリです。S&P 500、NASDAQ-100、Nasdaq Next Generation 100の構成銘柄を対象に、市場データをPythonでバッチ処理し、相対的に強い銘柄を毎週算出して表示することを目的とします。
-
-現在はPhase 1です。3つの対象Universeを無料公開データから取得し、正規化・重複除去したCSV Snapshotを生成できます。価格取得、ランキング計算、Web画面はまだ実装していません。市場データはフロントエンドから直接取得せず、将来生成するJSONをReact PWAから読み込む構成とします。
+`data/`配下のRuntime CSV、JSON、Parquetは`.gitignore`で除外しています。Frontendが配信する`web/public/data/latest.json`は静的表示に必要なため、Workflowで更新してリポジトリへ反映します。
 
 ## Pythonセットアップ
 
-Python 3.12を用意し、リポジトリのルートで仮想環境を作成します。
+Python 3.12を使用します。
 
 ```powershell
 py -3.12 -m venv .venv
@@ -84,7 +73,86 @@ python -m pip install --upgrade pip
 python -m pip install -e ".[dev]"
 ```
 
-## Test方法
+Runtime依存関係は`pandas`、`numpy`、`yfinance`、`requests`、`beautifulsoup4`、`pyyaml`、`pydantic`、`tenacity`、`pyarrow`です。開発用に`pytest`と`ruff`を使用します。
+
+## Frontendセットアップ
+
+```powershell
+cd web
+npm ci
+npm run dev
+```
+
+ブラウザで表示するデータは`web/public/data/latest.json`です。Frontendから有料APIや市場データAPIには接続しません。
+
+## 手動バッチ実行
+
+リポジトリのルートで、次の順番に実行します。
+
+```powershell
+python -m engine.universe.builder
+python -m engine.market_data.cache
+python -m engine.ranking.base
+python -m engine.ranking.regime
+python -m engine.ranking.tactical
+python -m engine.portfolio.builder
+python -m engine.results.builder
+Copy-Item data/results/latest.json web/public/data/latest.json -Force
+```
+
+前回のMarket Regimeを指定する場合は、次のように実行します。
+
+```powershell
+python -m engine.ranking.regime --previous-state WARNING
+```
+
+主な生成物は次の通りです。
+
+- `data/universe/YYYY-MM-DD.csv`: Universe Snapshot
+- `data/market_data/prices.parquet`: 日足価格Cache
+- `data/market_data/metadata.json`: 取得件数、失敗銘柄、Benchmark、データ状態
+- `data/results/base-YYYY-MM-DD.json` / `.csv`: Base Ranking
+- `data/results/regime-YYYY-MM-DD.json`: Market Regime
+- `data/results/tactical-YYYY-MM-DD.json` / `.csv`: Tactical Ranking
+- `data/portfolio/YYYY-MM-DD.json`: Theme制約後のPortfolio
+- `data/results/YYYY-MM-DD.json`: 日付付きFrontend用結果
+- `data/results/latest.json`: 最新結果
+
+## データ状態
+
+対象Universeの必要データを1銘柄でも取得できない場合、推定で補完せず`INCOMPLETE`として扱います。
+
+- `OFFICIAL`: 必要なUniverseデータが揃っている
+- `INCOMPLETE`: 取得失敗、欠損、履歴不足、Benchmark不足などがある
+- `RANKING_OFFICIAL_PORTFOLIO_PENDING`: Rankingは有効だが、Theme確認が必要でPortfolio確定を保留
+
+Risk OFFでも現金化は行いません。RegimeはBase Scoreの配分を変更しますが、Portfolioは常時10銘柄・各10%を基本とします。
+
+## Themeの更新
+
+`config/theme_history.yaml`を編集します。計測日時点で有効なレコードだけが使用され、未来のTheme情報を過去へ適用しません。
+
+```yaml
+themes:
+  - ticker: NVDA
+    theme: AI Infrastructure
+    effective_from: "2026-01-01"
+    effective_to: null
+```
+
+Tickerのベンダー差異は`config/ticker_alias.yaml`で管理します。
+
+```yaml
+aliases:
+  BRK.B: BRK-B
+  BF.B: BF-B
+```
+
+Theme未登録のTactical上位銘柄は`THEME_REVIEW_REQUIRED`となります。Rankingは無効にせず、Portfolioだけ確定保留にします。
+
+## テスト・品質確認
+
+Pythonの全テストと静的解析は次で実行します。
 
 ```powershell
 pytest
@@ -92,23 +160,50 @@ ruff check .
 python -c "import engine; import engine.init; print('engine import ok')"
 ```
 
-## Universe Snapshot生成
+Frontendは次で型チェック、Unit Test、本番ビルド、PWA生成をまとめて確認します。
 
 ```powershell
-python -m engine.universe.builder
+cd web
+npm run check
 ```
 
-取得したSPY、QQQ、QQQJを統合し、`data/universe/YYYY-MM-DD.csv`へ保存します。取得先が部分データの場合は採用せず、Fallback失敗も実行結果に表示します。
+外部通信を必要とする取得処理はUnit Testから分離し、Parser・計算式・欠損判定・Golden FixtureをローカルFixtureで検証します。
 
-テストは外部APIや市場データに依存しない形で実行します。データ不足を推定で補う処理や、有料API・証券会社APIへの接続は行いません。
+## GitHub Actions
 
-## 今後のPhase概要
+`.github/workflows/weekly-ranking.yml`を使用します。
 
-1. Universeと市場データ取得・キャッシュの基盤
-2. Base Trend RankingとTactical Rankingの計算
-3. Market Regime、Theme Constraint、Portfolio Builder
-4. JSON生成バッチとGitHub Actions自動実行
-5. React / TypeScript / Viteによるランキング表示とPWA化
-6. 結合テスト、データ不足時のINCOMPLETE判定、Vercel公開準備
+- 定期実行: 毎週土曜日08:17 JST相当（`17 23 * * 5` UTC）
+- 手動実行: `workflow_dispatch`
+- 実行順: Universe → Market Data → Validation → Base → Regime → Tactical → Portfolio → Result JSON → pytest → ruff → Frontend Build → Deploy
+- 取得失敗や検証失敗時はWorkflowを失敗扱いにし、不完全な結果で正常終了しません
+- ログにAs Of、Universe件数、取得成功・失敗、Ranking状態を出力
+- CacheはGitHub Actions Cacheへ保存
 
-各Phaseで要件、実装、自動テスト、実行確認を完了してから次のPhaseへ進みます。
+Vercel Deployには次のGitHub Secretsを使用します。値をソースコードへ記述しません。
+
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
+
+Ranking、テスト、Frontend Buildがすべて成功した場合のみ、静的React PWAをVercelへDeployします。失敗時は前回の正常版を維持します。
+
+## 既知の制約
+
+- 無料データソースの仕様変更、レート制限、通信障害の影響を受けます
+- `yfinance`で取得できない銘柄は推定補完せず、データ状態を`INCOMPLETE`にします
+- Delisted銘柄、Ticker変更、Corporate Actionの履歴は無料データの品質に依存します
+- 日中更新ではなく、週次バッチで生成した結果を表示します
+- 売買注文、証券会社連携、現金化、通知機能はありません
+
+## 障害時の復旧
+
+1. GitHub Actionsの失敗ステップとPipeline Summaryを確認します。
+2. `As Of`、Universe件数、取得失敗銘柄、Benchmark sourceを確認します。
+3. 必要に応じてWorkflowを`workflow_dispatch`で再実行します。
+4. Theme関連の場合は`config/theme_history.yaml`を修正して再実行します。
+5. 失敗したWorkflowではDeployされないため、Vercel上の前回正常版が維持されます。
+
+## 運用方針
+
+本アプリは個人利用向けのリサーチ補助ツールです。ランキングは投資助言や売買推奨を目的とせず、データ取得状況と計算結果を確認したうえで利用してください。
