@@ -151,9 +151,10 @@ jobs:
           test -n "$VERCEL_TOKEN"
           test -n "$VERCEL_ORG_ID"
           test -n "$VERCEL_PROJECT_ID"
-          npx --yes vercel@latest --cwd "$GITHUB_WORKSPACE/web" pull --yes --environment=production --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID"
-          npx --yes vercel@latest --cwd "$GITHUB_WORKSPACE/web" build --prod --token="$VERCEL_TOKEN"
-          npx --yes vercel@latest --cwd "$GITHUB_WORKSPACE/web" deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+          cd "$GITHUB_WORKSPACE/web"
+          npx --yes vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID"
+          npx --yes vercel@latest build --prod --token="$VERCEL_TOKEN"
+          npx --yes vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
 
       - name: Pipeline Summary
         if: always()
