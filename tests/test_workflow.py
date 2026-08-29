@@ -45,9 +45,9 @@ def test_weekly_workflow_runs_pipeline_in_order_and_deploys_after_checks() -> No
     assert "cp data/results/latest.json web/public/data/latest.json" in text
     assert "failure_count" in text
     assert "if: success()" in text
-    assert "npx --yes vercel@latest pull" in text
-    assert "npx --yes vercel@latest build --prod" in text
-    assert "npx --yes vercel@latest deploy --prebuilt --prod" in text
+    assert 'npx --yes vercel@latest --cwd "$GITHUB_WORKSPACE/web" pull' in text
+    assert 'npx --yes vercel@latest --cwd "$GITHUB_WORKSPACE/web" build --prod' in text
+    assert 'npx --yes vercel@latest --cwd "$GITHUB_WORKSPACE/web" deploy --prebuilt --prod' in text
     assert "VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}" in text
     assert "VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}" in text
     assert "VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}" in text
