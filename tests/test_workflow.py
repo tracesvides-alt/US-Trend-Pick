@@ -27,6 +27,7 @@ def test_weekly_workflow_runs_pipeline_in_order_and_deploys_after_checks() -> No
         "name: Base",
         "name: Regime",
         "name: Tactical",
+        "name: Theme",
         "name: Portfolio",
         "name: Generate JSON",
         "name: pytest",
@@ -41,8 +42,10 @@ def test_weekly_workflow_runs_pipeline_in_order_and_deploys_after_checks() -> No
     assert "python -m engine.universe.builder" in text
     assert "python -m engine.market_data.cache" in text
     assert "python -m engine.results.builder" in text
+    assert "python -m engine.theme.classifier" in text
     assert "test -s data/results/theme-review.json" in text
     assert "cp data/results/latest.json web/public/data/latest.json" in text
+    assert "data/themes/history.json" in text
     assert "failure_count" in text
     assert "if: success()" in text
     assert 'npx --yes vercel@latest --cwd "$GITHUB_WORKSPACE/web" pull' in text

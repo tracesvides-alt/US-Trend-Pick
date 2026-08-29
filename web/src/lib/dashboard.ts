@@ -21,6 +21,11 @@ export type TacticalRow = RankRow & {
   mtd?: NullableNumber;
   weekly?: NullableNumber;
   theme?: string | null;
+  primary_theme?: string | null;
+  theme_score?: NullableNumber;
+  second_theme?: string | null;
+  second_theme_score?: NullableNumber;
+  theme_confidence?: string | null;
   status?: string;
 };
 
@@ -34,6 +39,11 @@ export type PortfolioRow = {
   ytd?: NullableNumber;
   mtd?: NullableNumber;
   weekly?: NullableNumber;
+  primary_theme?: string | null;
+  theme_score?: NullableNumber;
+  second_theme?: string | null;
+  second_theme_score?: NullableNumber;
+  theme_confidence?: string | null;
 };
 
 export type ThemeReviewRow = {
@@ -48,6 +58,31 @@ export type ThemeReviewRow = {
   status?: string;
   note?: string | null;
   reason?: string;
+  confidence?: string | null;
+  theme_score?: NullableNumber;
+  second_theme?: string | null;
+  second_theme_score?: NullableNumber;
+};
+
+export type ThemeSnapshotRow = {
+  ticker: string;
+  primary_theme: string;
+  theme_score: number;
+  second_theme: string;
+  second_theme_score: number;
+  confidence: string;
+  company_name?: string | null;
+  sector?: string | null;
+  industry?: string | null;
+  as_of: string;
+};
+
+export type ThemeChangeRow = {
+  ticker: string;
+  previous_theme: string;
+  new_theme: string;
+  as_of: string;
+  reason: string;
 };
 
 export type RankChange = {
@@ -84,6 +119,8 @@ export type ResultDocument = {
   };
   portfolioStatus: string;
   themeReview: ThemeReviewRow[];
+  themeSnapshot?: ThemeSnapshotRow[];
+  themeChanges?: ThemeChangeRow[];
   portfolio: PortfolioRow[];
   baseRanking: RankRow[];
   tacticalRanking: TacticalRow[];

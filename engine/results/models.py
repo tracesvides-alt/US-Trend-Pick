@@ -39,7 +39,7 @@ class PortfolioRecord(BaseModel):
 
 
 class ThemeReviewRecord(BaseModel):
-    """Theme coverage for one of the Tactical Top30 rows."""
+    """Backward-compatible Theme coverage for one of the Tactical Top30 rows."""
 
     model_config = ConfigDict(extra="allow")
 
@@ -53,6 +53,10 @@ class ThemeReviewRecord(BaseModel):
     required: bool = True
     status: str = Field(default="THEME_REVIEW_REQUIRED", min_length=1)
     note: str | None = None
+    confidence: str | None = None
+    theme_score: float | None = None
+    second_theme: str | None = None
+    second_theme_score: float | None = None
 
     @model_validator(mode="after")
     def validate_theme_state(self) -> "ThemeReviewRecord":
@@ -62,6 +66,30 @@ class ThemeReviewRecord(BaseModel):
         elif self.current_theme is None or self.status != "THEME_SET":
             raise ValueError("Theme Review configured rows must have a current Theme")
         return self
+
+
+class ThemeSnapshotRecord(BaseModel):
+    """Automatic point-in-time Theme classification embedded in latest.json."""
+
+    model_config = ConfigDict(extra="allow")
+
+    ticker: str = Field(min_length=1)
+    primary_theme: str = Field(min_length=1)
+    theme_score: float = Field(ge=0, le=100)
+    second_theme: str = Field(min_length=1)
+    second_theme_score: float = Field(ge=0, le=100)
+    confidence: str = Field(min_length=1)
+    as_of: date
+
+
+class ThemeChangeRecord(BaseModel):
+    """Theme change event kept separate from weekly rank rotation."""
+
+    ticker: str = Field(min_length=1)
+    previous_theme: str = Field(min_length=1)
+    new_theme: str = Field(min_length=1)
+    as_of: date
+    reason: str = Field(min_length=1)
 
 
 class DataHealth(BaseModel):
@@ -133,6 +161,14 @@ class ResultDocument(BaseModel):
     theme_review: list[ThemeReviewRecord] = Field(
         default_factory=list,
         alias="themeReview",
+    )
+    theme_snapshot: list[ThemeSnapshotRecord] = Field(
+        default_factory=list,
+        alias="themeSnapshot",
+    )
+    theme_changes: list[ThemeChangeRecord] = Field(
+        default_factory=list,
+        alias="themeChanges",
     )
     portfolio: list[PortfolioRecord] = Field(default_factory=list)
     base_ranking: list[RankingRecord] = Field(alias="baseRanking")

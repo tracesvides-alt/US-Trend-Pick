@@ -346,7 +346,7 @@ function Dashboard({ result, onSelectTicker, onNavigate }: { result: ResultDocum
         </div>
       </section>
 
-      <ThemeReviewPanel rows={result.themeReview} onSelectTicker={onSelectTicker} />
+      <ThemeStatusPanel snapshot={result.themeSnapshot ?? []} changes={result.themeChanges ?? []} onSelectTicker={onSelectTicker} />
 
       <section className="panel" id="tactical">
         <SectionHeading title="Tacticalランキング" kicker={`${topTactical.length}銘柄が計算対象 / 並べ替え・検索`} />
@@ -398,8 +398,8 @@ function ReviewNotice({ rows }: { rows: ThemeReviewRow[] }) {
     <div className="review-notice">
       <div className="notice-icon">!</div>
       <div>
-        <strong>テーマ設定待ちのため採用銘柄を確認中です</strong>
-        <p>{rows.length > 0 ? `Tactical上位30銘柄のうち${rows.length}銘柄にTheme設定がありません。` : "採用候補を確定できるデータがまだありません。"} テーマ確認後にPortfolioを確定します。</p>
+        <strong>採用銘柄を確認中です</strong>
+        <p>{rows.length > 0 ? `Tactical上位30銘柄のTheme判定を確認中です。` : "採用候補を確定できるデータがまだありません。"} 次回のバッチで再計算されます。</p>
         <div className="review-tickers">
           {rows.slice(0, 10).map((row) => <span key={row.ticker}>{row.ticker}</span>)}
           {rows.length > 10 && <span>+{rows.length - 10}</span>}
@@ -409,27 +409,34 @@ function ReviewNotice({ rows }: { rows: ThemeReviewRow[] }) {
   );
 }
 
-function ThemeReviewPanel({ rows, onSelectTicker }: { rows: ThemeReviewRow[]; onSelectTicker: (ticker: string) => void }) {
-  const pending = rows.filter(isThemeReviewRequired);
+function ThemeStatusPanel({
+  snapshot,
+  changes,
+  onSelectTicker,
+}: {
+  snapshot: NonNullable<ResultDocument["themeSnapshot"]>;
+  changes: NonNullable<ResultDocument["themeChanges"]>;
+  onSelectTicker: (ticker: string) => void;
+}) {
   return (
     <section className="panel theme-review-panel" id="theme-review">
-      <SectionHeading title="テーマ設定待ち" kicker={`Tactical上位${rows.length || 30}銘柄 / Git管理で手動設定`} />
-      {pending.length > 0 ? (
-        <>
-          <p className="theme-review-help">Themeは自動確定しません。<code>config/theme_history.yaml</code>を更新し、GitHub Actionsを再実行してください。</p>
-          <div className="theme-review-list">
-            {pending.map((row) => (
-              <button className="theme-review-row" key={row.ticker} onClick={() => onSelectTicker(row.ticker)}>
-                <span className="theme-review-main"><strong>{row.ticker}</strong><small>{row.company_name ?? "企業名未取得"}</small></span>
-                <span className="theme-review-ranks"><small>Tactical / Base</small><strong>{rankLabel(row.tactical_rank)} / {rankLabel(row.base_rank)}</strong></span>
-                <span className="theme-review-sector"><small>{row.sector ?? "セクター未取得"}</small><span>{row.industry ?? "業種未取得"}</span></span>
-                <span className="mini-pill tone-warning">テーマ設定待ち</span>
-              </button>
-            ))}
-          </div>
-        </>
+      <SectionHeading title="テーマ自動判定" kicker={`Tactical上位${Math.min(30, snapshot.length)}銘柄を含む全Universe`} />
+      <div className="theme-auto-summary">
+        <div><strong>{snapshot.length}銘柄</strong><span>Primary Themeを自動分類済み</span></div>
+        <div><strong>{changes.length}件</strong><span>今回のテーマ変更</span></div>
+      </div>
+      {changes.length > 0 ? (
+        <div className="theme-change-list">
+          {changes.map((change) => (
+            <button className="theme-change-row" key={`${change.ticker}-${change.as_of}`} onClick={() => onSelectTicker(change.ticker)}>
+              <span className="theme-review-main"><strong>{change.ticker}</strong><small>{formatDate(change.as_of)}</small></span>
+              <span className="theme-change-path"><span>{change.previous_theme}</span><b>→</b><span>{change.new_theme}</span></span>
+              <span className="mini-pill tone-accent">テーマ変更</span>
+            </button>
+          ))}
+        </div>
       ) : (
-        <div className="empty-state compact-empty"><span className="empty-mark">✓</span><strong>テーマ設定待ちはありません</strong><small>上位30銘柄のThemeが確認済みです</small></div>
+        <div className="empty-state compact-empty"><span className="empty-mark">✓</span><strong>今回のテーマ変更はありません</strong><small>全銘柄をPrimary Themeへ自動分類済みです</small></div>
       )}
     </section>
   );
@@ -500,13 +507,14 @@ function TacticalTable({ result, onSelectTicker }: { result: ResultDocument; onS
   const [sorting, setSorting] = useState<SortingState>([{ id: "tactical_rank", desc: false }]);
   const themeByTicker = useMemo(() => {
     const map: Record<string, string> = {};
+    (result.themeSnapshot ?? []).forEach((row) => { map[row.ticker] = row.primary_theme; });
     result.themeReview.forEach((row) => { if (row.current_theme) map[row.ticker] = row.current_theme; });
     result.portfolio.forEach((row) => { if (row.theme) map[row.ticker] = row.theme; });
     return map;
-  }, [result.portfolio, result.themeReview]);
+  }, [result.portfolio, result.themeReview, result.themeSnapshot]);
   const rows = useMemo<TacticalRow[]>(() => result.tacticalRanking.map((row) => ({
     ...row,
-    theme: themeByTicker[row.ticker] ?? null,
+    theme: row.primary_theme ?? themeByTicker[row.ticker] ?? null,
     status: getTacticalStatus(row),
   })), [result.tacticalRanking, themeByTicker]);
   const columns = useMemo<ColumnDef<TacticalRow>[]>(() => [
@@ -608,6 +616,7 @@ function StockDetail({ result, ticker, onBack }: { result: ResultDocument; ticke
   const tactical = result.tacticalRanking.find((row) => row.ticker === ticker);
   const base = result.baseRanking.find((row) => row.ticker === ticker);
   const holding = result.portfolio.find((row) => row.ticker === ticker);
+  const theme = (result.themeSnapshot ?? []).find((row) => row.ticker === ticker);
   const history = stockRankHistory(ticker, result);
   if (!tactical && !base) return <main className="page-container detail-page"><button className="back-button" onClick={onBack}>← ダッシュボードに戻る</button><div className="panel empty-state"><strong>銘柄が見つかりません</strong><small>現在の結果JSONに該当Tickerがありません</small></div></main>;
 
@@ -616,14 +625,27 @@ function StockDetail({ result, ticker, onBack }: { result: ResultDocument; ticke
     <main className="page-container detail-page">
       <button className="back-button" onClick={onBack}>← ダッシュボードに戻る</button>
       <section className="detail-hero">
-        <div><p className="eyebrow">銘柄詳細 / {formatDate(result.asOf)}</p><h1>{ticker}</h1><p>{holding?.theme ?? "テーマ未設定"}</p></div>
+        <div><p className="eyebrow">銘柄詳細 / {formatDate(result.asOf)}</p><h1>{ticker}</h1><p>{theme?.primary_theme ?? tactical?.primary_theme ?? holding?.theme ?? "Other"}</p></div>
         <span className={`status-pill ${toneForStatus(currentStatus)}`}>{tacticalStatusLabel(currentStatus)}</span>
       </section>
       <section className="detail-grid">
         <div className="panel chart-panel"><SectionHeading title="ランキング履歴" kicker="前回と今回のTactical順位" /><div className="chart-wrap"><ResponsiveContainer width="100%" height="100%"><LineChart data={history} margin={{ top: 12, right: 10, left: -20, bottom: 4 }}><CartesianGrid strokeDasharray="3 3" stroke="#263244" /><XAxis dataKey="period" stroke="#718096" tickLine={false} axisLine={false} /><YAxis reversed allowDecimals={false} stroke="#718096" tickLine={false} axisLine={false} /><Tooltip contentStyle={{ background: "#151b27", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10 }} labelStyle={{ color: "#f5f7fa" }} /><Line type="monotone" dataKey="tacticalRank" name="Tactical" stroke="#4cc9f0" strokeWidth={2.5} dot={{ r: 4, fill: "#4cc9f0", stroke: "#080b12", strokeWidth: 2 }} connectNulls /></LineChart></ResponsiveContainer></div></div>
         <div className="panel detail-stats"><SectionHeading title="スナップショット" kicker="現在値" /><DetailStat label="Tactical順位" value={rankLabel(tactical?.tactical_rank)} accent /><DetailStat label="Base順位" value={rankLabel(tactical?.base_rank ?? base?.base_rank)} /><DetailStat label="Tacticalスコア" value={formatScore(tactical?.tactical_score)} /><DetailStat label="健全度" value={formatScore(tactical?.health)} /><DetailStat label="YTD / MTD" value={`${formatPercent(tactical?.ytd)} / ${formatPercent(tactical?.mtd)}`} /><DetailStat label="Weekly" value={formatPercent(tactical?.weekly)} /><DetailStat label="Stage" value={stageLabel(tactical?.stage)} /><DetailStat label="採用状態" value={holding ? formatStatus(holding.status) : "未採用"} /></div>
-      </section>
-    </main>
+       </section>
+      <ThemeDetailStats snapshot={theme} />
+     </main>
+  );
+}
+
+function ThemeDetailStats({ snapshot }: { snapshot: NonNullable<ResultDocument["themeSnapshot"]>[number] | undefined }) {
+  return (
+    <section className="panel detail-stats theme-detail-panel">
+      <SectionHeading title="テーマ判定" kicker="自動分類 / 現在のSnapshot" />
+      <DetailStat label="Primary Theme" value={snapshot?.primary_theme ?? "Other"} accent />
+      <DetailStat label="Confidence" value={snapshot?.confidence ?? "LOW"} />
+      <DetailStat label="Theme Score" value={formatScore(snapshot?.theme_score)} />
+      <DetailStat label="Second Theme" value={`${snapshot?.second_theme ?? "Other"} / ${formatScore(snapshot?.second_theme_score)}`} />
+    </section>
   );
 }
 

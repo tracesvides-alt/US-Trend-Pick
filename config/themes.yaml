@@ -1,3 +1,55 @@
-# Primary Theme master. theme_history.yaml may reference only these names.
-# Add a mapping with name and optional description for each canonical Theme.
-themes: []
+# Fixed Primary Theme master used by the automatic classifier.
+# The classifier may only emit one of these exact names.
+themes:
+  - name: AI Memory / HBM
+    description: High-bandwidth memory and AI memory technologies
+  - name: NAND / Storage
+    description: NAND, flash, SSD, and data storage
+  - name: Optical / Photonics
+    description: Optical communication, photonics, lasers, and transceivers
+  - name: AI Networking
+    description: Networking, switching, Ethernet, and connectivity for AI systems
+  - name: ASIC / Custom Silicon
+    description: ASIC, custom chips, and dedicated AI accelerators
+  - name: AI Server
+    description: AI servers, GPU systems, and compute platforms
+  - name: Semiconductor Equipment
+    description: Semiconductor manufacturing equipment and process tools
+  - name: Foundry / CPU
+    description: Foundries, CPUs, processors, and semiconductor manufacturing
+  - name: Data Center Power
+    description: Power management, UPS, cooling, and thermal systems for data centers
+  - name: Cloud / AI Infrastructure
+    description: Cloud computing, data centers, and AI infrastructure software
+  - name: Nuclear
+    description: Nuclear power, uranium, and reactor technologies
+  - name: Utilities
+    description: Electric, regulated, and other utility businesses
+  - name: Energy
+    description: Oil, gas, refining, and broader energy producers
+  - name: Financials
+    description: Banks, insurance, asset management, and financial services
+  - name: FinTech
+    description: Digital payments and financial technology platforms
+  - name: Cybersecurity
+    description: Cybersecurity, identity, endpoint, and threat protection
+  - name: Robotics
+    description: Robotics, automation, and autonomous industrial systems
+  - name: Defense
+    description: Defense, military, and aerospace defense systems
+  - name: Space
+    description: Spacecraft, satellites, launch, and orbital systems
+  - name: Biotechnology
+    description: Biotechnology, genomics, gene therapy, and biopharmaceuticals
+  - name: Healthcare
+    description: Healthcare services, medical devices, and pharmaceuticals
+  - name: Consumer Staples
+    description: Food, beverages, household, and personal care products
+  - name: Consumer Discretionary
+    description: Retail, automotive, e-commerce, and discretionary consumption
+  - name: Travel
+    description: Airlines, hotels, hospitality, cruises, and travel services
+  - name: Crypto Infrastructure
+    description: Crypto, blockchain, digital assets, and related infrastructure
+  - name: Other
+    description: Companies without sufficient evidence for a more specific Theme

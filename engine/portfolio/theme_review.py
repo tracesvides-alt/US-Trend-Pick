@@ -1,4 +1,4 @@
-"""Theme review detection kept separate from Theme confirmation and suggestions."""
+"""Compatibility coverage output for automatic Theme snapshots."""
 
 from __future__ import annotations
 
@@ -52,9 +52,10 @@ def build_theme_review(
     tactical_ranking: pd.DataFrame,
     universe: pd.DataFrame | None,
     active_themes: dict[str, str],
+    theme_details: dict[str, dict[str, Any]] | None = None,
     limit: int = THEME_REVIEW_LIMIT,
 ) -> list[dict[str, Any]]:
-    """Check active Theme coverage for the ranked Tactical top N rows."""
+    """Expose automatic Theme coverage for the ranked Tactical top N rows."""
 
     if tactical_ranking.empty or "ticker" not in tactical_ranking.columns:
         return []
@@ -67,9 +68,9 @@ def build_theme_review(
     review: list[dict[str, Any]] = []
     for row in ranked.to_dict("records"):
         ticker = str(row["ticker"]).strip().upper()
-        source = {**metadata.get(ticker, {}), **row}
-        current_theme = active_themes.get(ticker)
-        required = current_theme is None
+        current_theme = active_themes.get(ticker) or "Other"
+        detail = (theme_details or {}).get(ticker, {})
+        source = {**detail, **metadata.get(ticker, {}), **row}
         review.append(
             {
                 "ticker": ticker,
@@ -79,8 +80,12 @@ def build_theme_review(
                 "sector": _text(source.get("sector")),
                 "industry": _text(source.get("industry")),
                 "current_theme": current_theme,
-                "required": required,
-                "status": "THEME_REVIEW_REQUIRED" if required else "THEME_SET",
+                "required": False,
+                "status": "THEME_SET",
+                "confidence": detail.get("confidence"),
+                "theme_score": detail.get("theme_score"),
+                "second_theme": detail.get("second_theme"),
+                "second_theme_score": detail.get("second_theme_score"),
             }
         )
     return review

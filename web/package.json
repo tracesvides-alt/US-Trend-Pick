@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --configLoader runner",
     "preview": "vite preview",
-    "test": "vitest run",
+    "test": "vitest run --configLoader runner",
     "typecheck": "tsc --noEmit",
     "check": "npm run typecheck && npm run test && npm run build"
   },

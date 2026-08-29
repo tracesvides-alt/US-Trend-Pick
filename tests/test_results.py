@@ -113,6 +113,40 @@ def test_previous_rank_and_portfolio_transitions_are_calculated() -> None:
     assert [row.ticker for row in document.rotation.hold] == ["BBB"]
 
 
+def test_automatic_theme_snapshot_is_embedded_without_changing_rankings() -> None:
+    values = _inputs()
+    document = build_result_document(
+        date(2026, 8, 29),
+        theme_snapshot=[
+            {
+                "ticker": "BBB",
+                "primary_theme": "AI Networking",
+                "theme_score": 87.0,
+                "second_theme": "ASIC / Custom Silicon",
+                "second_theme_score": 42.0,
+                "confidence": "HIGH",
+                "as_of": "2026-08-29",
+            }
+        ],
+        theme_changes=[
+            {
+                "ticker": "BBB",
+                "previous_theme": "Cloud / AI Infrastructure",
+                "new_theme": "AI Networking",
+                "as_of": "2026-08-29",
+                "reason": "TWO_CONSECUTIVE_WEEKLY_WINS",
+            }
+        ],
+        **values,
+    )
+
+    tactical = next(row for row in document.tactical_ranking if row.ticker == "BBB")
+    assert tactical.primary_theme == "AI Networking"
+    assert tactical.theme_score == 87.0
+    assert document.theme_snapshot[0].confidence == "HIGH"
+    assert document.theme_changes[0].new_theme == "AI Networking"
+
+
 def test_theme_pending_status_is_separate_from_ranking_status() -> None:
     values = _inputs()
     values["portfolio_payload"] = {

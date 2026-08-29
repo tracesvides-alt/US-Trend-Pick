@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 
 from engine.dates import measurement_date
+from engine.theme.history import DEFAULT_THEME_DIR
 from engine.portfolio.theme_review import write_theme_review_output
 from engine.results.models import (
     DataHealth,
@@ -22,7 +23,9 @@ from engine.results.models import (
     RankChange,
     ResultDocument,
     Rotation,
+    ThemeChangeRecord,
     ThemeReviewRecord,
+    ThemeSnapshotRecord,
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -88,6 +91,33 @@ def _rank(row: dict[str, Any], key: str = "tactical_rank") -> float | None:
     except (TypeError, ValueError):
         return None
     return value if math.isfinite(value) else None
+
+
+def _attach_theme_fields(
+    rows: list[dict[str, Any]],
+    theme_snapshot: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Attach automatic Theme fields without changing any ranking values."""
+
+    by_ticker = {
+        _ticker(row): row
+        for row in theme_snapshot
+        if isinstance(row, dict) and _ticker(row)
+    }
+    enriched: list[dict[str, Any]] = []
+    for row in rows:
+        detail = by_ticker.get(_ticker(row), {})
+        enriched.append(
+            {
+                **row,
+                "primary_theme": detail.get("primary_theme"),
+                "theme_score": detail.get("theme_score"),
+                "second_theme": detail.get("second_theme"),
+                "second_theme_score": detail.get("second_theme_score"),
+                "theme_confidence": detail.get("confidence"),
+            }
+        )
+    return enriched
 
 
 def _active_portfolio(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
@@ -260,11 +290,17 @@ def build_result_document(
     metadata: dict[str, Any],
     universe_count: int,
     previous_result: dict[str, Any] | None = None,
+    theme_snapshot: list[dict[str, Any]] | None = None,
+    theme_changes: list[dict[str, Any]] | None = None,
 ) -> ResultDocument:
     """Build a ResultDocument and validate every output field with Pydantic."""
 
     base_rows = _records(base_ranking, "base_ranking")
     tactical_rows = _records(tactical_ranking, "tactical_ranking")
+    snapshot_rows = _records(theme_snapshot or [], "theme_snapshot")
+    change_rows = _records(theme_changes or [], "theme_changes")
+    base_rows = _attach_theme_fields(base_rows, snapshot_rows)
+    tactical_rows = _attach_theme_fields(tactical_rows, snapshot_rows)
     regime = _json_safe(market_regime)
     holdings, review, portfolio_status = _portfolio_rows(portfolio_payload)
     ranking_health = _data_health(
@@ -289,6 +325,8 @@ def build_result_document(
         dataHealth=ranking_health,
         portfolioStatus=portfolio_status,
         themeReview=[ThemeReviewRecord.model_validate(row) for row in review],
+        themeSnapshot=[ThemeSnapshotRecord.model_validate(row) for row in snapshot_rows],
+        themeChanges=[ThemeChangeRecord.model_validate(row) for row in change_rows],
         portfolio=[PortfolioRecord.model_validate(row) for row in holdings],
         baseRanking=base_rows,
         tacticalRanking=tactical_rows,
@@ -388,6 +426,7 @@ def run_result_builder(
     metadata_path: str | Path = DEFAULT_METADATA_PATH,
     results_dir: str | Path = DEFAULT_RESULTS_DIR,
     portfolio_dir: str | Path = DEFAULT_PORTFOLIO_DIR,
+    theme_dir: str | Path = DEFAULT_THEME_DIR,
     as_of: date | None = None,
 ) -> tuple[ResultDocument, tuple[Path, Path]]:
     """Load existing phase artifacts and generate the validated result files."""
@@ -419,6 +458,18 @@ def run_result_builder(
     portfolio_payload = _load_json(portfolio_file, {})
     previous_payload = _load_json(previous_file, None)
     metadata = _load_json(metadata_file, {})
+    theme_snapshot_file = Path(theme_dir) / f"{output_date.isoformat()}.json"
+    theme_snapshot = _load_json(theme_snapshot_file, [])
+    if not theme_snapshot:
+        raise FileNotFoundError(
+            f"Automatic Theme snapshot not found or empty: {theme_snapshot_file}"
+        )
+    all_theme_changes = _load_json(Path(theme_dir) / "theme-changes.json", [])
+    theme_changes = [
+        row
+        for row in _records(all_theme_changes, "theme_changes")
+        if row.get("as_of") == output_date.isoformat()
+    ]
     document = build_result_document(
         output_date,
         _records(base_payload, "base_ranking"),
@@ -428,6 +479,8 @@ def run_result_builder(
         metadata,
         _universe_count(universe_file),
         previous_payload,
+        theme_snapshot=theme_snapshot,
+        theme_changes=theme_changes,
     )
     return document, write_result_outputs(document, results_dir)
 

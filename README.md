@@ -24,6 +24,10 @@ S&P 500、NASDAQ-100、Nasdaq Next Generation 100の構成銘柄を対象に、�
 - Tactical Ranking
   - Relative Strength、RS Drawdown、移動平均、Stage 4判定
   - YTD、MTD、Weeklyリターン
+- Primary Theme自動判定
+  - Company Sector、Industry、Business Summary、Company Name、過去判定を入力
+  - 固定Theme Master、Keyword Score、Confidence、Other fallback
+  - 2回連続の週次判定でのみThemeを変更
 - Theme Constraintを適用した10銘柄Portfolio Builder
 - Pydanticで検証したFrontend用単一JSON
 - 日本語中心のダークFinTech UI、モバイルBottom Navigation、ランキング検索・並べ替え
@@ -38,7 +42,7 @@ Python Batch（取得・検証・計算）
         ↓
 Parquet Cache / JSON / CSV
         ↓
-Base → Market Regime → Tactical → Portfolio
+Base → Market Regime → Tactical → Theme Classifier → Portfolio
         ↓
 data/results/latest.json
         ↓
@@ -53,14 +57,14 @@ React PWA（静的表示）
 
 ```text
 engine/                 Pythonの取得・検証・ランキング・Portfolio処理
-config/                 Primary Themeマスター、Theme履歴、Ticker Alias
-data/                   実行時に生成するCache・Snapshot・結果
+config/                 Primary Themeマスター、互換用設定、Ticker Alias
+data/                   実行時に生成するCache・Snapshot・結果・Theme履歴
 tests/                  Unit Test、Parser Fixture、Golden Fixture
 web/                    React / TypeScript / Vite / PWA
 .github/workflows/      GitHub Actions
 ```
 
-`data/`配下のRuntime CSV、JSON、Parquetは`.gitignore`で除外しています。Frontendが配信する`web/public/data/latest.json`は静的表示に必要なため、Workflowで更新してリポジトリへ反映します。
+`data/`配下のRuntime CSV、JSON、Parquetは`.gitignore`で除外しています。Frontendが配信する`web/public/data/latest.json`はWorkflowで生成し、成功したVercelの静的Deploy artifactへ含めます。Runtime結果を毎回Gitへ自動Commitする方式ではありません。
 
 ## Pythonセットアップ
 
@@ -95,6 +99,7 @@ python -m engine.market_data.cache
 python -m engine.ranking.base
 python -m engine.ranking.regime
 python -m engine.ranking.tactical
+python -m engine.theme.classifier
 python -m engine.portfolio.builder
 python -m engine.results.builder
 Copy-Item data/results/latest.json web/public/data/latest.json -Force
@@ -114,8 +119,12 @@ python -m engine.ranking.regime --previous-state WARNING
 - `data/results/base-YYYY-MM-DD.json` / `.csv`: Base Ranking
 - `data/results/regime-YYYY-MM-DD.json`: Market Regime
 - `data/results/tactical-YYYY-MM-DD.json` / `.csv`: Tactical Ranking
+- `data/themes/YYYY-MM-DD.json`: 計測日時点の全Universe Theme Snapshot
+- `data/themes/history.json`: 自動管理されるTheme有効期間履歴
+- `data/themes/theme-changes.json`: Theme変更履歴
+- `data/themes/company-profiles.json`: 無料Company ProfileのCache
 - `data/portfolio/YYYY-MM-DD.json`: Theme制約後のPortfolio
-- `data/results/theme-review.json`: Tactical上位30銘柄のTheme設定確認
+- `data/results/theme-review.json`: Tactical上位30銘柄のTheme状態（互換出力）
 - `data/results/YYYY-MM-DD.json`: 日付付きFrontend用結果
 - `data/results/latest.json`: 最新結果
 
@@ -125,40 +134,27 @@ python -m engine.ranking.regime --previous-state WARNING
 
 - `OFFICIAL`: 必要なUniverseデータが揃っている
 - `INCOMPLETE`: 取得失敗、欠損、履歴不足、Benchmark不足などがある
-- `RANKING_OFFICIAL_PORTFOLIO_PENDING`: Rankingは有効だが、Theme確認が必要でPortfolio確定を保留
+- `RANKING_OFFICIAL_PORTFOLIO_PENDING`: 旧形式との互換用。自動Themeでは通常使用しない
 
 Risk OFFでも現金化は行いません。RegimeはBase Scoreの配分を変更しますが、Portfolioは常時10銘柄・各10%を基本とします。
 
-## Themeの更新
+## Theme自動判定
 
-Primary Themeは`config/themes.yaml`でマスター管理します。`theme_history.yaml`で使用できる値は、マスターに存在するThemeだけです。Theme候補の自動提案とTheme確定は分離しており、MVPではWeb画面から編集せず、Git管理下で手動更新します。
+Themeはランキング計算へ入力せず、Tactical Ranking完成後に自動判定します。
 
-まず`config/themes.yaml`へ利用可能なPrimary Themeを登録します。
-
-```yaml
-themes:
-  - name: AI Infrastructure
-    description: AI向け半導体・データセンター基盤
-  - name: Cloud Software
-    description: クラウドソフトウェア
+```text
+Tactical Ranking → Primary Theme自動判定 → Theme Constraint → Portfolio確定
 ```
 
-次に`config/theme_history.yaml`でTickerごとの有効期間を登録します。`note`は任意です。
+`config/themes.yaml`はClassifierが出力できるPrimary Themeの固定Masterです。ClassifierはMaster外の新しいTheme名を生成せず、判定材料が少ない場合は必ず`Other`へ分類します。
 
-```yaml
-themes:
-  - ticker: NVDA
-    theme: AI Infrastructure
-    effective_from: "2026-01-01"
-    effective_to: null
-    note: Primary exposure
-```
+判定には無料のCompany Profile情報を使用します。優先順位はSector、Industry、Business Summary、Company Name、過去Themeです。Yahoo Financeから取得したProfileは`data/themes/company-profiles.json`へCacheします。
 
-計測日時点で有効なレコードだけが使用され、未来のTheme情報を過去へ適用しません。Tactical上位30銘柄を毎回確認し、Theme未設定の行は`THEME_REVIEW_REQUIRED`として`data/results/theme-review.json`へ出力します。
+各銘柄について、`primary_theme`、`theme_score`、`second_theme`、`second_theme_score`、`confidence`（`HIGH` / `MEDIUM` / `LOW`）を保存します。Confidenceが`LOW`でもPortfolioを停止せず、最高ScoreのThemeを暫定Primary Themeとして使用します。
 
-Theme Reviewには、`ticker`、`company_name`、`tactical_rank`、`base_rank`、`sector`、`industry`、`current_theme`、`required`を含めます。
+毎回の判定は`data/themes/YYYY-MM-DD.json`へPoint-in-Time Snapshotとして保存します。過去Snapshotを現在のランキングへ適用しません。既存Themeから別Themeへ変更する場合は、新Themeが2回連続の週次計測で優位になったときだけ変更し、旧履歴を終了して新しい期間を追加します。変更は`data/themes/theme-changes.json`へ保存し、Weekly Rotationとは分離して表示します。
 
-Theme未設定でもBase RankingとTactical Rankingは正式結果として生成します。未設定銘柄がPortfolioの選定候補になった場合だけ、Portfolio Statusが`THEME_REVIEW_REQUIRED`になります。
+通常運用で`config/theme_history.yaml`を編集する必要はありません。同ファイルは旧手動方式との互換用に残していますが、Portfolio Builderは同じ計測日の自動Snapshotだけを使用します。
 
 Tickerのベンダー差異は`config/ticker_alias.yaml`で管理します。
 
@@ -168,7 +164,7 @@ aliases:
   BF.B: BF-B
 ```
 
-Theme未設定のTactical上位30銘柄はReview対象になります。Rankingは無効にせず、Portfolioだけ必要に応じて確定保留にします。
+Theme判定後は全銘柄にMaster内のThemeが付与されるため、Theme未設定を理由にPortfolio計算を停止しません。
 
 ## テスト・品質確認
 
@@ -195,7 +191,7 @@ npm run check
 
 - 定期実行: 毎週土曜日08:17 JST相当（`17 23 * * 5` UTC）
 - 手動実行: `workflow_dispatch`
-- 実行順: Universe → Market Data → Validation → Base → Regime → Tactical → Portfolio → Result JSON → pytest → ruff → Frontend Build → Deploy
+- 実行順: Universe → Market Data → Validation → Base → Regime → Tactical → Theme → Portfolio → Result JSON → pytest → ruff → Frontend Build → Deploy
 - 取得失敗や検証失敗時はWorkflowを失敗扱いにし、不完全な結果で正常終了しません
 - ログにAs Of、Universe件数、取得成功・失敗、Ranking状態を出力
 - CacheはGitHub Actions Cacheへ保存
@@ -221,7 +217,7 @@ Ranking、テスト、Frontend Buildがすべて成功した場合のみ、静�
 1. GitHub Actionsの失敗ステップとPipeline Summaryを確認します。
 2. `As Of`、Universe件数、取得失敗銘柄、Benchmark sourceを確認します。
 3. 必要に応じてWorkflowを`workflow_dispatch`で再実行します。
-4. Theme関連の場合は`config/theme_history.yaml`を修正して再実行します。
+4. Theme関連の場合は`data/themes`のSnapshot、Profile Cache、`theme-changes.json`を確認して再実行します。
 5. 失敗したWorkflowではDeployされないため、Vercel上の前回正常版が維持されます。
 
 ## 運用方針

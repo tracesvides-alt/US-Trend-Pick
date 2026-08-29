@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+import json
 from datetime import date
 
 import pandas as pd
 import pytest
 
-from engine.portfolio.builder import build_portfolio, theme_constraint_ok
+from engine.portfolio.builder import build_portfolio, run_portfolio_builder, theme_constraint_ok
 from engine.portfolio.theme import active_theme_map, load_theme_history
 from engine.portfolio.theme_review import build_theme_review, write_theme_review_output
+from engine.theme.classifier import run_theme_classifier
+from engine.theme.models import CompanyProfile
 
 
 def _tactical_rows(rows: list[dict]) -> pd.DataFrame:
@@ -178,7 +181,7 @@ def test_previous_portfolio_statuses_keep_hold_and_rotation() -> None:
     } <= set(result.holdings[0])
 
 
-def test_unclassified_top30_review_does_not_change_ranking() -> None:
+def test_classifier_fallback_theme_does_not_block_portfolio() -> None:
     tactical = _tactical_rows(
         [
             {"ticker": "AAA", "tactical_rank": 1},
@@ -188,14 +191,15 @@ def test_unclassified_top30_review_does_not_change_ranking() -> None:
 
     result = build_portfolio(tactical, {"BBB": "Beta"}, target_holdings=1)
 
-    assert result.portfolio_status == "THEME_REVIEW_REQUIRED"
+    assert result.portfolio_status == "CONFIRMED"
     assert result.selected_count == 1
     assert [row["ticker"] for row in result.theme_review] == ["AAA", "BBB"]
-    assert result.theme_review[0]["required"] is True
-    assert result.theme_review[0]["status"] == "THEME_REVIEW_REQUIRED"
+    assert result.theme_review[0]["current_theme"] == "Other"
+    assert result.theme_review[0]["required"] is False
+    assert result.theme_review[0]["status"] == "THEME_SET"
     assert result.theme_review[1]["current_theme"] == "Beta"
     assert result.theme_review[1]["required"] is False
-    assert result.holdings[0]["ticker"] == "BBB"
+    assert result.holdings[0]["ticker"] == "AAA"
 
 
 def test_unclassified_non_candidate_does_not_make_portfolio_pending() -> None:
@@ -211,7 +215,8 @@ def test_unclassified_non_candidate_does_not_make_portfolio_pending() -> None:
     assert result.portfolio_status == "CONFIRMED"
     assert result.selected_count == 1
     assert [row["ticker"] for row in result.theme_review] == ["AAA", "BBB"]
-    assert result.theme_review[1]["required"] is True
+    assert result.theme_review[1]["current_theme"] == "Other"
+    assert result.theme_review[1]["required"] is False
 
 
 def test_theme_review_checks_ranked_top30_and_keeps_metadata(tmp_path) -> None:
@@ -250,12 +255,17 @@ def test_theme_review_checks_ranked_top30_and_keeps_metadata(tmp_path) -> None:
         "base_rank": 1.5,
         "sector": "Technology",
         "industry": "Software",
-        "current_theme": "Alpha",
-        "required": False,
-        "status": "THEME_SET",
+            "current_theme": "Alpha",
+            "required": False,
+            "status": "THEME_SET",
+            "confidence": None,
+            "theme_score": None,
+            "second_theme": None,
+            "second_theme_score": None,
     }
     assert review[-1]["ticker"] == "TICKER30"
-    assert review[-1]["required"] is True
+    assert review[-1]["current_theme"] == "Other"
+    assert review[-1]["required"] is False
 
     output = write_theme_review_output(review, tmp_path)
     payload = pd.read_json(output)
@@ -304,3 +314,60 @@ def test_confirmed_portfolio_has_ten_equal_weight_holdings() -> None:
     assert result.selected_count == 10
     assert len(selected) == 10
     assert sum(row["weight"] for row in selected) == pytest.approx(1.0)
+
+
+def test_portfolio_builder_consumes_same_date_automatic_theme_snapshot(tmp_path) -> None:
+    as_of = date(2026, 8, 29)
+    tactical_path = tmp_path / "tactical-2026-08-29.csv"
+    universe_path = tmp_path / "2026-08-29.csv"
+    tactical = _tactical_rows(
+        [{"ticker": f"TICKER{index}", "tactical_rank": index} for index in range(1, 11)]
+    )
+    tactical.to_csv(tactical_path, index=False)
+    pd.DataFrame(
+        [{"ticker": f"TICKER{index}", "company_name": f"Company {index}"} for index in range(1, 11)]
+    ).to_csv(universe_path, index=False)
+    theme_dir = tmp_path / "themes"
+    run_theme_classifier(
+        tactical_path=tactical_path,
+        universe_path=universe_path,
+        theme_dir=theme_dir,
+        as_of=as_of,
+        profile_fetcher=lambda ticker: CompanyProfile(
+            ticker=ticker,
+            business_summary=[
+                "HBM",
+                "NAND SSD storage",
+                "optical photonics",
+                "Ethernet SerDes networking",
+                "ASIC custom silicon",
+                "AI server",
+                "lithography",
+                "foundry CPU",
+                "UPS power management",
+                "nuclear reactor",
+            ][int(ticker.removeprefix("TICKER")) - 1],
+        ),
+    )
+
+    result, output = run_portfolio_builder(
+        tactical_path=tactical_path,
+        theme_snapshot_path=theme_dir / "2026-08-29.json",
+        universe_path=universe_path,
+        portfolio_dir=tmp_path / "portfolio",
+        results_dir=tmp_path / "results",
+        as_of=as_of,
+    )
+
+    assert result.portfolio_status == "CONFIRMED"
+    assert output.name == "2026-08-29.json"
+    snapshot = {
+        row["ticker"]: row["primary_theme"]
+        for row in json.loads((theme_dir / "2026-08-29.json").read_text(encoding="utf-8"))
+    }
+    assert all(
+        row["theme"] == snapshot[row["ticker"]]
+        for row in result.holdings
+        if row["weight"] > 0
+    )
+    assert all(row["theme_confidence"] for row in result.holdings if row["weight"] > 0)

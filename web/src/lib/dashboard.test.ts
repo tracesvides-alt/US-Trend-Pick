@@ -58,6 +58,8 @@ describe("dashboard helpers", () => {
       dataHealth: {} as never,
       portfolioStatus: "CONFIRMED",
       themeReview: [],
+      themeSnapshot: [],
+      themeChanges: [],
       portfolio: [],
       baseRanking: [],
       tacticalRanking: [{ ticker: "AAA", tactical_rank: 4 }],
