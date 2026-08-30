@@ -147,6 +147,90 @@ def test_automatic_theme_snapshot_is_embedded_without_changing_rankings() -> Non
     assert document.theme_changes[0].new_theme == "AI Networking"
 
 
+def test_result_contains_nested_component_explanations_and_rank_history() -> None:
+    values = _inputs()
+    values["base_ranking"] = [
+        {
+            "ticker": "AAA",
+            "momentum_raw": 1.8,
+            "momentum_score": 100.0,
+            "momentum_rank": 1.0,
+            "volume_expansion_raw": 2.1,
+            "volume_score": 80.0,
+            "volume_expansion_rank": 2.0,
+            "beta_raw": 1.6,
+            "beta_score": 60.0,
+            "beta_rank": 3.0,
+            "base_score": 84.0,
+            "base_rank": 1.0,
+        },
+        {
+            "ticker": "BBB",
+            "momentum_raw": 1.1,
+            "momentum_score": 80.0,
+            "momentum_rank": 2.0,
+            "volume_expansion_raw": 1.5,
+            "volume_score": 100.0,
+            "volume_expansion_rank": 1.0,
+            "beta_raw": 1.2,
+            "beta_score": 80.0,
+            "beta_rank": 2.0,
+            "base_score": 86.0,
+            "base_rank": 2.0,
+        },
+        {"ticker": "CCC", "base_rank": 3.0, "base_score": 40.0},
+    ]
+    values["tactical_ranking"] = [
+        {
+            "ticker": "AAA",
+            "base_rank": 1.0,
+            "base_score": 84.0,
+            "tactical_rank": 2.0,
+            "tactical_score": 82.0,
+            "tactical_previous_rank": 4.0,
+            "health": 76.0,
+            "penalty": 0.0,
+            "relative_20d_raw": 0.08,
+            "relative_20d_score": 90.0,
+            "relative_20d_rank": 2.0,
+            "rs_drawdown_raw": -0.04,
+            "rs_drawdown_score": 84.0,
+            "dma50_distance_raw": 0.07,
+            "dma50_distance_score": 88.0,
+            "dma50_slope_raw": 0.03,
+            "dma50_slope_score": 82.0,
+        },
+        {"ticker": "BBB", "tactical_rank": 1.0, "tactical_score": 90.0},
+        {"ticker": "CCC", "tactical_rank": 3.0, "tactical_score": 40.0},
+    ]
+
+    document = build_result_document(date(2026, 8, 29), **values)
+    row = next(item for item in document.tactical_ranking if item.ticker == "AAA")
+
+    assert row.base is not None
+    assert row.base.rank == 1.0
+    assert row.base.score == 84.0
+    assert row.base_components is not None
+    assert row.base_components.momentum.rank == 1.0
+    assert row.base_components.volume_expansion.score == 80.0
+    assert row.tactical is not None
+    assert row.tactical.previous_rank == 4.0
+    assert row.tactical.rank_change == 2.0
+    assert row.tactical_components is not None
+    assert row.tactical_components.relative_20d.rank == 2.0
+    assert row.tactical_components.dma50_slope.raw == 0.03
+
+
+def test_nested_explanation_schema_rejects_invalid_component_score() -> None:
+    values = _inputs()
+    document = build_result_document(date(2026, 8, 29), **values)
+    payload = document.model_dump(mode="json", by_alias=True)
+    payload["tacticalRanking"][0]["base_components"]["momentum"]["score"] = 101.0
+
+    with pytest.raises(ValidationError):
+        ResultDocument.model_validate(payload)
+
+
 def test_theme_pending_status_is_separate_from_ranking_status() -> None:
     values = _inputs()
     values["portfolio_payload"] = {

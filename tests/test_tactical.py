@@ -87,6 +87,94 @@ def test_tactical_rank_uses_average_rank_for_ties() -> None:
     )
 
 
+def test_tactical_components_keep_raw_scores_and_cross_sectional_ranks() -> None:
+    dates = pd.bdate_range("2024-01-01", periods=260)
+    index = np.arange(len(dates), dtype=float)
+
+    def prices(ticker: str, slope: float) -> pd.DataFrame:
+        return pd.DataFrame(
+            {
+                "date": dates,
+                "ticker": ticker,
+                "Adj Close": 100.0 + index * slope,
+                "Close": 100.0 + index * slope,
+                "Volume": 1_000.0,
+            }
+        )
+
+    price_data = pd.concat(
+        [prices("AAA", 0.8), prices("BBB", 0.4), prices("SPY", 0.2)],
+        ignore_index=True,
+    )
+    universe = pd.DataFrame({"ticker": ["AAA", "BBB"]})
+    base = pd.DataFrame(
+        {
+            "ticker": ["AAA", "BBB"],
+            "base_rank": [1.0, 2.0],
+            "base_score": [90.0, 80.0],
+            "momentum_score": [90.0, 80.0],
+            "volume_score": [90.0, 80.0],
+            "beta_score": [50.0, 50.0],
+        }
+    )
+
+    result, exclusions = calculate_tactical_ranking(
+        universe,
+        base,
+        price_data,
+        "SPY",
+        "WARNING",
+    )
+
+    assert all(not reasons for reasons in exclusions.values())
+    assert result["relative_20d_rank"].notna().all()
+    for column in (
+        "relative_20d_raw",
+        "relative_20d_score",
+        "rs_drawdown_raw",
+        "rs_drawdown_score",
+        "dma50_distance_raw",
+        "dma50_distance_score",
+        "dma50_slope_raw",
+        "dma50_slope_score",
+    ):
+        assert result[column].notna().all()
+    assert result["relative_20d_rank"].min() == 1.0
+
+
+def test_tactical_rank_history_is_optional_for_new_tickers() -> None:
+    dates = pd.bdate_range("2024-01-01", periods=260)
+    index = np.arange(len(dates), dtype=float)
+    price_data = pd.concat(
+        [
+            pd.DataFrame({"date": dates, "ticker": "AAA", "Adj Close": 100.0 + index}),
+            pd.DataFrame({"date": dates, "ticker": "BBB", "Adj Close": 100.0 + index * 0.5}),
+            pd.DataFrame({"date": dates, "ticker": "SPY", "Adj Close": 100.0 + index * 0.2}),
+        ],
+        ignore_index=True,
+    )
+    base = pd.DataFrame(
+        {
+            "ticker": ["AAA", "BBB"],
+            "base_rank": [1.0, 2.0],
+            "base_score": [90.0, 80.0],
+            "momentum_score": [90.0, 80.0],
+            "volume_score": [90.0, 80.0],
+            "beta_score": [50.0, 50.0],
+        }
+    )
+    result, _ = calculate_tactical_ranking(
+        pd.DataFrame({"ticker": ["AAA", "BBB"]}),
+        base,
+        price_data,
+        "SPY",
+        "WARNING",
+    )
+
+    assert result["tactical_previous_rank"].isna().all()
+    assert result["tactical_rank_change"].isna().all()
+
+
 def test_stage4_requires_both_strict_conditions() -> None:
     dates = pd.date_range("2024-01-01", periods=220, freq="B")
     prices = pd.Series(np.linspace(200.0, 100.0, len(dates)), index=dates)

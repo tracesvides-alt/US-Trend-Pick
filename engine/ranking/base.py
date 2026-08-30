@@ -13,6 +13,7 @@ import pandas as pd
 
 from engine.dates import measurement_date
 from engine.ranking.beta import BetaMetrics, calculate_beta
+from engine.ranking.explanations import attach_previous_rank_columns, descending_rank
 from engine.ranking.momentum import calculate_momentum
 from engine.ranking.percentile import percentile_score
 from engine.ranking.volume import calculate_dollar_volume_expansion
@@ -32,6 +33,17 @@ OUTPUT_COLUMNS = [
     "beta_score",
     "base_score",
     "base_rank",
+    "momentum_rank",
+    "momentum_previous_rank",
+    "momentum_rank_change",
+    "volume_expansion_rank",
+    "volume_expansion_previous_rank",
+    "volume_expansion_rank_change",
+    "beta_rank",
+    "beta_previous_rank",
+    "beta_rank_change",
+    "base_previous_rank",
+    "base_rank_change",
 ]
 
 
@@ -100,6 +112,7 @@ def calculate_base_ranking(
     price_data: pd.DataFrame,
     benchmark_data: pd.DataFrame,
     benchmark_ticker: str,
+    previous_ranking: pd.DataFrame | None = None,
 ) -> tuple[pd.DataFrame, dict[str, list[str]]]:
     """Calculate Base scores for every Universe ticker using identical rules."""
 
@@ -152,6 +165,19 @@ def calculate_base_ranking(
         axis=1,
     )
     result["base_rank"] = result["base_score"].rank(method="average", ascending=False)
+    result["momentum_rank"] = descending_rank(result["momentum_score"])
+    result["volume_expansion_rank"] = descending_rank(result["volume_score"])
+    result["beta_rank"] = descending_rank(result["beta_score"])
+    result = attach_previous_rank_columns(
+        result,
+        None if previous_ranking is None else previous_ranking.to_dict(orient="records"),
+        [
+            ("momentum_rank", "momentum_previous_rank", "momentum_rank_change", "momentum_score", "momentum_raw"),
+            ("volume_expansion_rank", "volume_expansion_previous_rank", "volume_expansion_rank_change", "volume_score", "volume_expansion_raw"),
+            ("beta_rank", "beta_previous_rank", "beta_rank_change", "beta_score", "beta_raw"),
+            ("base_rank", "base_previous_rank", "base_rank_change", "base_score", None),
+        ],
+    )
     result = result.sort_values(["base_rank", "ticker"], kind="stable")
     return result[OUTPUT_COLUMNS].reset_index(drop=True), dict(excluded)
 
@@ -164,6 +190,28 @@ def _read_benchmark_ticker(metadata_path: str | Path = DEFAULT_METADATA_PATH) ->
         if ticker:
             return str(ticker).strip().upper()
     return "^GSPC"
+
+
+def _previous_base_path(
+    results_dir: str | Path,
+    as_of: date,
+) -> Path | None:
+    candidates: list[tuple[date, Path]] = []
+    for path in Path(results_dir).glob("base-*.json"):
+        try:
+            snapshot_date = date.fromisoformat(path.stem.removeprefix("base-"))
+        except ValueError:
+            continue
+        if snapshot_date < as_of:
+            candidates.append((snapshot_date, path))
+    return max(candidates, key=lambda item: item[0])[1] if candidates else None
+
+
+def _load_previous_base(path: Path | None) -> pd.DataFrame | None:
+    if path is None or not path.exists():
+        return None
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return pd.DataFrame(payload if isinstance(payload, list) else payload.get("records", []))
 
 
 def write_base_outputs(
@@ -191,19 +239,23 @@ def run_base_ranking(
     metadata_path: str | Path = DEFAULT_METADATA_PATH,
     results_dir: str | Path = DEFAULT_RESULTS_DIR,
     as_of: date | None = None,
+    previous_path: str | Path | None = None,
 ) -> tuple[pd.DataFrame, dict[str, list[str]], tuple[Path, Path]]:
     """Load Phase 1/2 artifacts, calculate all Base metrics, and save outputs."""
 
+    output_date = as_of or measurement_date()
     tickers = _load_tickers(universe_path)
     prices = pd.read_parquet(cache_path)
     benchmark_ticker = _read_benchmark_ticker(metadata_path)
+    previous_file = Path(previous_path) if previous_path else _previous_base_path(results_dir, output_date)
+    previous = _load_previous_base(previous_file)
     result, excluded = calculate_base_ranking(
         tickers,
         prices,
         prices,
         benchmark_ticker,
+        previous_ranking=previous,
     )
-    output_date = as_of or measurement_date()
     paths = write_base_outputs(result, output_date, results_dir)
     return result, excluded, paths
 

@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 
 from engine.dates import measurement_date
+from engine.ranking.explanations import descending_rank, rank_change
 from engine.theme.history import DEFAULT_THEME_DIR
 from engine.portfolio.theme_review import write_theme_review_output
 from engine.results.models import (
@@ -118,6 +119,286 @@ def _attach_theme_fields(
             }
         )
     return enriched
+
+
+def _number_or_none(value: Any) -> float | None:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    return number if math.isfinite(number) else None
+
+
+def _nested_value(row: dict[str, Any], path: tuple[str, ...]) -> Any:
+    value: Any = row
+    for key in path:
+        if not isinstance(value, dict):
+            return None
+        value = value.get(key)
+    return value
+
+
+def _explanation_rank_map(
+    rows: list[dict[str, Any]],
+    *,
+    rank_key: str,
+    score_key: str | None = None,
+    raw_key: str | None = None,
+    nested_path: tuple[str, ...] | None = None,
+) -> dict[str, float | None]:
+    """Return ranks while supporting both new and legacy result snapshots."""
+
+    tickers = [_ticker(row) for row in rows if _ticker(row)]
+    direct: dict[str, float | None] = {}
+    values: dict[str, float | None] = {}
+    for row in rows:
+        ticker = _ticker(row)
+        if not ticker:
+            continue
+        nested_rank = _nested_value(row, nested_path) if nested_path else None
+        direct[ticker] = _number_or_none(row.get(rank_key))
+        if direct[ticker] is None:
+            direct[ticker] = _number_or_none(nested_rank)
+        nested_score = _nested_value(
+            row,
+            nested_path[:-1] + ("score",),
+        ) if nested_path else None
+        values[ticker] = _number_or_none(row.get(score_key)) if score_key else None
+        if values[ticker] is None:
+            values[ticker] = _number_or_none(nested_score)
+        if values[ticker] is None and raw_key:
+            values[ticker] = _number_or_none(row.get(raw_key))
+
+    derived = descending_rank(pd.Series(values, dtype="float64"))
+    return {
+        ticker: direct.get(ticker)
+        if direct.get(ticker) is not None
+        else _number_or_none(derived.get(ticker))
+        for ticker in tickers
+    }
+
+
+def _previous_rows(payload: dict[str, Any] | None, key: str) -> list[dict[str, Any]]:
+    if not payload:
+        return []
+    rows = payload.get(key, [])
+    return [row for row in rows if isinstance(row, dict)] if isinstance(rows, list) else []
+
+
+BASE_COMPONENT_SPECS = {
+    "momentum": {
+        "raw": "momentum_raw",
+        "score": "momentum_score",
+        "rank": "momentum_rank",
+        "previous_rank": "momentum_previous_rank",
+        "rank_change": "momentum_rank_change",
+    },
+    "volume_expansion": {
+        "raw": "volume_expansion_raw",
+        "score": "volume_score",
+        "rank": "volume_expansion_rank",
+        "previous_rank": "volume_expansion_previous_rank",
+        "rank_change": "volume_expansion_rank_change",
+    },
+    "beta": {
+        "raw": "beta_raw",
+        "score": "beta_score",
+        "rank": "beta_rank",
+        "previous_rank": "beta_previous_rank",
+        "rank_change": "beta_rank_change",
+    },
+}
+
+TACTICAL_COMPONENT_SPECS = {
+    "relative_20d": {
+        "raw": "relative_20d_raw",
+        "score": "relative_20d_score",
+        "rank": "relative_20d_rank",
+    },
+    "rs_drawdown_63d": {
+        "raw": "rs_drawdown_raw",
+        "score": "rs_drawdown_score",
+        "rank": "rs_drawdown_rank",
+    },
+    "dma50_distance": {
+        "raw": "dma50_distance_raw",
+        "score": "dma50_distance_score",
+        "rank": "dma50_distance_rank",
+    },
+    "dma50_slope": {
+        "raw": "dma50_slope_raw",
+        "score": "dma50_slope_score",
+        "rank": "dma50_slope_rank",
+    },
+}
+
+
+def _component_explanation(
+    source: dict[str, Any],
+    ticker: str,
+    spec: dict[str, str],
+    current_ranks: dict[str, float | None],
+    previous_ranks: dict[str, float | None],
+    previous_nested_path: tuple[str, ...] | None = None,
+) -> dict[str, float | None]:
+    current_rank = _number_or_none(source.get(spec["rank"]))
+    if current_rank is None:
+        current_rank = current_ranks.get(ticker)
+    previous_rank = _number_or_none(source.get(spec.get("previous_rank", "")))
+    if previous_rank is None:
+        previous_rank = previous_ranks.get(ticker)
+    return {
+        "raw": _number_or_none(source.get(spec["raw"])),
+        "score": _number_or_none(source.get(spec["score"])),
+        "rank": current_rank,
+        "previous_rank": previous_rank,
+        "rank_change": rank_change(previous_rank, current_rank),
+    }
+
+
+def _attach_explanation_fields(
+    base_rows: list[dict[str, Any]],
+    tactical_rows: list[dict[str, Any]],
+    previous_payload: dict[str, Any] | None,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Add nested explanation fields while preserving all existing flat fields."""
+
+    previous_base = _previous_rows(previous_payload, "baseRanking")
+    previous_tactical = _previous_rows(previous_payload, "tacticalRanking")
+    base_by_ticker = {_ticker(row): row for row in base_rows if _ticker(row)}
+
+    current_base_ranks = {
+        name: _explanation_rank_map(
+            base_rows,
+            rank_key=spec["rank"],
+            score_key=spec["score"],
+            raw_key=spec["raw"],
+            nested_path=("base_components", name, "rank"),
+        )
+        for name, spec in BASE_COMPONENT_SPECS.items()
+    }
+    previous_base_ranks = {
+        name: _explanation_rank_map(
+            previous_base,
+            rank_key=spec["rank"],
+            score_key=spec["score"],
+            raw_key=spec["raw"],
+            nested_path=("base_components", name, "rank"),
+        )
+        for name, spec in BASE_COMPONENT_SPECS.items()
+    }
+    current_base_total = _explanation_rank_map(
+        base_rows,
+        rank_key="base_rank",
+        score_key="base_score",
+        nested_path=("base", "rank"),
+    )
+    previous_base_total = _explanation_rank_map(
+        previous_base,
+        rank_key="base_rank",
+        score_key="base_score",
+        nested_path=("base", "rank"),
+    )
+
+    def with_base(row: dict[str, Any]) -> dict[str, Any]:
+        ticker = _ticker(row)
+        source = base_by_ticker.get(ticker, row)
+        current_rank = _number_or_none(source.get("base_rank")) or current_base_total.get(ticker)
+        previous_rank = _number_or_none(source.get("base_previous_rank"))
+        if previous_rank is None:
+            previous_rank = previous_base_total.get(ticker)
+        components = {
+            name: _component_explanation(
+                source,
+                ticker,
+                spec,
+                current_base_ranks[name],
+                previous_base_ranks[name],
+            )
+            for name, spec in BASE_COMPONENT_SPECS.items()
+        }
+        return {
+            **row,
+            "base": {
+                "rank": current_rank,
+                "previous_rank": previous_rank,
+                "rank_change": rank_change(previous_rank, current_rank),
+                "score": _number_or_none(source.get("base_score")),
+            },
+            "base_components": components,
+        }
+
+    enriched_base = [with_base(row) for row in base_rows]
+
+    current_tactical_ranks = _explanation_rank_map(
+        tactical_rows,
+        rank_key="tactical_rank",
+        score_key="tactical_score",
+        nested_path=("tactical", "rank"),
+    )
+    previous_tactical_ranks = _explanation_rank_map(
+        previous_tactical,
+        rank_key="tactical_rank",
+        score_key="tactical_score",
+        nested_path=("tactical", "rank"),
+    )
+    current_tactical_components = {
+        name: _explanation_rank_map(
+            tactical_rows,
+            rank_key=spec["rank"],
+            score_key=spec["score"],
+            raw_key=spec["raw"],
+            nested_path=("tactical_components", name, "rank"),
+        )
+        for name, spec in TACTICAL_COMPONENT_SPECS.items()
+    }
+    previous_tactical_components = {
+        name: _explanation_rank_map(
+            previous_tactical,
+            rank_key=spec["rank"],
+            score_key=spec["score"],
+            raw_key=spec["raw"],
+            nested_path=("tactical_components", name, "rank"),
+        )
+        for name, spec in TACTICAL_COMPONENT_SPECS.items()
+    }
+
+    enriched_tactical: list[dict[str, Any]] = []
+    for row in tactical_rows:
+        ticker = _ticker(row)
+        base_row = base_by_ticker.get(ticker, row)
+        base_enriched = with_base({**row, **base_row})
+        current_rank = _number_or_none(row.get("tactical_rank")) or current_tactical_ranks.get(ticker)
+        previous_rank = _number_or_none(row.get("tactical_previous_rank"))
+        if previous_rank is None:
+            previous_rank = previous_tactical_ranks.get(ticker)
+        components = {
+            name: _component_explanation(
+                row,
+                ticker,
+                spec,
+                current_tactical_components[name],
+                previous_tactical_components[name],
+            )
+            for name, spec in TACTICAL_COMPONENT_SPECS.items()
+        }
+        enriched_tactical.append(
+            {
+                **row,
+                "base": base_enriched["base"],
+                "base_components": base_enriched["base_components"],
+                "tactical": {
+                    "rank": current_rank,
+                    "previous_rank": previous_rank,
+                    "rank_change": rank_change(previous_rank, current_rank),
+                    "score": _number_or_none(row.get("tactical_score")),
+                    "health": _number_or_none(row.get("health")),
+                    "penalty": _number_or_none(row.get("penalty")),
+                },
+                "tactical_components": components,
+            }
+        )
+    return enriched_base, enriched_tactical
 
 
 def _active_portfolio(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
@@ -297,6 +578,11 @@ def build_result_document(
 
     base_rows = _records(base_ranking, "base_ranking")
     tactical_rows = _records(tactical_ranking, "tactical_ranking")
+    base_rows, tactical_rows = _attach_explanation_fields(
+        base_rows,
+        tactical_rows,
+        previous_result,
+    )
     snapshot_rows = _records(theme_snapshot or [], "theme_snapshot")
     change_rows = _records(theme_changes or [], "theme_changes")
     base_rows = _attach_theme_fields(base_rows, snapshot_rows)

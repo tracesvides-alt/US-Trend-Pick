@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 
 from engine.dates import measurement_date
+from engine.ranking.explanations import attach_previous_rank_columns, descending_rank
 from engine.ranking.momentum import adjusted_price_series
 from engine.ranking.percentile import percentile_score
 from engine.ranking.returns import (
@@ -43,6 +44,18 @@ REGIME_BASE_WEIGHTS = {
 }
 OUTPUT_COLUMNS = [
     "ticker",
+    "relative_20d_raw",
+    "relative_20d_score",
+    "relative_20d_rank",
+    "rs_drawdown_raw",
+    "rs_drawdown_score",
+    "rs_drawdown_rank",
+    "dma50_distance_raw",
+    "dma50_distance_score",
+    "dma50_distance_rank",
+    "dma50_slope_raw",
+    "dma50_slope_score",
+    "dma50_slope_rank",
     "base_rank",
     "tactical_rank",
     "rank_change",
@@ -56,6 +69,8 @@ OUTPUT_COLUMNS = [
     "ytd",
     "mtd",
     "weekly",
+    "tactical_previous_rank",
+    "tactical_rank_change",
 ]
 
 
@@ -208,6 +223,28 @@ def _load_regime(path: str | Path | None = None) -> dict[str, Any]:
     return json.loads(regime_path.read_text(encoding="utf-8"))
 
 
+def _previous_tactical_path(
+    results_dir: str | Path,
+    as_of: date,
+) -> Path | None:
+    candidates: list[tuple[date, Path]] = []
+    for path in Path(results_dir).glob("tactical-*.json"):
+        try:
+            snapshot_date = date.fromisoformat(path.stem.removeprefix("tactical-"))
+        except ValueError:
+            continue
+        if snapshot_date < as_of:
+            candidates.append((snapshot_date, path))
+    return max(candidates, key=lambda item: item[0])[1] if candidates else None
+
+
+def _load_previous_tactical(path: Path | None) -> pd.DataFrame | None:
+    if path is None or not path.exists():
+        return None
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return pd.DataFrame(payload if isinstance(payload, list) else payload.get("records", []))
+
+
 def _load_benchmark_ticker(metadata_path: str | Path = DEFAULT_METADATA_PATH) -> str:
     path = Path(metadata_path)
     if path.exists():
@@ -269,6 +306,7 @@ def calculate_tactical_ranking(
     price_data: pd.DataFrame,
     benchmark_ticker: str,
     regime: str,
+    previous_ranking: pd.DataFrame | None = None,
 ) -> tuple[pd.DataFrame, dict[str, list[str]]]:
     """Calculate Tactical Ranking rows for the full Universe."""
 
@@ -276,6 +314,13 @@ def calculate_tactical_ranking(
     benchmark_frame = groups.get(str(benchmark_ticker).strip().upper(), pd.DataFrame())
     raw, exclusions = _build_raw_rows(universe, groups, benchmark_frame)
     raw["relative_20d_score"] = percentile_score(raw["relative_20d_raw"])
+    raw["rs_drawdown_score"] = raw["rs_drawdown_raw"].map(rs_drawdown_score)
+    raw["dma50_distance_score"] = raw["dma50_distance_raw"].map(dma50_distance_score)
+    raw["dma50_slope_score"] = raw["dma50_slope_raw"].map(dma50_slope_score)
+    raw["relative_20d_rank"] = descending_rank(raw["relative_20d_score"])
+    raw["rs_drawdown_rank"] = descending_rank(raw["rs_drawdown_score"])
+    raw["dma50_distance_rank"] = descending_rank(raw["dma50_distance_score"])
+    raw["dma50_slope_rank"] = descending_rank(raw["dma50_slope_score"])
     raw["health"] = raw.apply(
         lambda row: calculate_health(
             row["relative_20d_score"],
@@ -328,6 +373,18 @@ def calculate_tactical_ranking(
         output_rows.append(
             {
                 "ticker": ticker,
+                "relative_20d_raw": row.get("relative_20d_raw", np.nan),
+                "relative_20d_score": row.get("relative_20d_score", np.nan),
+                "relative_20d_rank": row.get("relative_20d_rank", np.nan),
+                "rs_drawdown_raw": row.get("rs_drawdown_raw", np.nan),
+                "rs_drawdown_score": row.get("rs_drawdown_score", np.nan),
+                "rs_drawdown_rank": row.get("rs_drawdown_rank", np.nan),
+                "dma50_distance_raw": row.get("dma50_distance_raw", np.nan),
+                "dma50_distance_score": row.get("dma50_distance_score", np.nan),
+                "dma50_distance_rank": row.get("dma50_distance_rank", np.nan),
+                "dma50_slope_raw": row.get("dma50_slope_raw", np.nan),
+                "dma50_slope_score": row.get("dma50_slope_score", np.nan),
+                "dma50_slope_rank": row.get("dma50_slope_rank", np.nan),
                 "base_rank": base_row.get("base_rank", np.nan) if base_row is not None else np.nan,
                 "base_score": base_row.get("base_score", np.nan) if base_row is not None else np.nan,
                 "regime_base_score": regime_base_score,
@@ -345,6 +402,13 @@ def calculate_tactical_ranking(
     result = pd.DataFrame(output_rows)
     result["tactical_rank"] = rank_tactical_scores(result["tactical_score"])
     result["rank_change"] = result["base_rank"] - result["tactical_rank"]
+    result = attach_previous_rank_columns(
+        result,
+        None
+        if previous_ranking is None
+        else previous_ranking.to_dict(orient="records"),
+        [("tactical_rank", "tactical_previous_rank", "tactical_rank_change", "tactical_score", None)],
+    )
     result = result[OUTPUT_COLUMNS]
     result = result.sort_values(
         ["tactical_rank", "ticker"],
@@ -379,9 +443,11 @@ def run_tactical_ranking(
     metadata_path: str | Path = DEFAULT_METADATA_PATH,
     results_dir: str | Path = DEFAULT_RESULTS_DIR,
     as_of: date | None = None,
+    previous_path: str | Path | None = None,
 ) -> tuple[pd.DataFrame, dict[str, list[str]], tuple[Path, Path]]:
     """Load existing Base/Regime artifacts, calculate, and save Tactical outputs."""
 
+    output_date = as_of or measurement_date()
     universe = _load_universe(universe_path)
     base = _load_base(base_path)
     regime_payload = _load_regime(regime_path)
@@ -390,14 +456,16 @@ def run_tactical_ranking(
         raise ValueError(f"Regime output has no usable regime state: {regime}")
     prices = pd.read_parquet(cache_path)
     benchmark_ticker = _load_benchmark_ticker(metadata_path)
+    previous_file = Path(previous_path) if previous_path else _previous_tactical_path(results_dir, output_date)
+    previous = _load_previous_tactical(previous_file)
     result, exclusions = calculate_tactical_ranking(
         universe,
         base,
         prices,
         benchmark_ticker,
         regime,
+        previous_ranking=previous,
     )
-    output_date = as_of or measurement_date()
     paths = write_tactical_outputs(result, output_date, results_dir)
     return result, exclusions, paths
 

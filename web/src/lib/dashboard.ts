@@ -1,5 +1,38 @@
 export type NullableNumber = number | null | undefined;
 
+export type MetricBreakdown = {
+  raw?: NullableNumber;
+  score?: NullableNumber;
+  rank?: NullableNumber;
+  previous_rank?: NullableNumber;
+  rank_change?: NullableNumber;
+};
+
+export type BaseSummary = {
+  rank?: NullableNumber;
+  previous_rank?: NullableNumber;
+  rank_change?: NullableNumber;
+  score?: NullableNumber;
+};
+
+export type TacticalSummary = BaseSummary & {
+  health?: NullableNumber;
+  penalty?: NullableNumber;
+};
+
+export type BaseComponents = {
+  momentum?: MetricBreakdown;
+  volume_expansion?: MetricBreakdown;
+  beta?: MetricBreakdown;
+};
+
+export type TacticalComponents = {
+  relative_20d?: MetricBreakdown;
+  rs_drawdown_63d?: MetricBreakdown;
+  dma50_distance?: MetricBreakdown;
+  dma50_slope?: MetricBreakdown;
+};
+
 export type RankRow = {
   ticker: string;
   base_rank?: NullableNumber;
@@ -7,6 +40,10 @@ export type RankRow = {
   momentum_score?: NullableNumber;
   volume_score?: NullableNumber;
   beta_score?: NullableNumber;
+  base?: BaseSummary;
+  base_components?: BaseComponents;
+  tactical?: TacticalSummary;
+  tactical_components?: TacticalComponents;
   [key: string]: unknown;
 };
 

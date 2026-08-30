@@ -14,12 +14,65 @@ ResultStatus = Literal[
 ]
 
 
+class MetricBreakdown(BaseModel):
+    """One component's raw value, score, and cross-sectional rank history."""
+
+    model_config = ConfigDict(extra="allow")
+
+    raw: float | None = None
+    score: float | None = Field(default=None, ge=0, le=100)
+    rank: float | None = Field(default=None, ge=1)
+    previous_rank: float | None = Field(default=None, ge=1)
+    rank_change: float | None = None
+
+
+class BaseSummary(BaseModel):
+    """Base total score and its rank history."""
+
+    model_config = ConfigDict(extra="allow")
+
+    rank: float | None = Field(default=None, ge=1)
+    previous_rank: float | None = Field(default=None, ge=1)
+    rank_change: float | None = None
+    score: float | None = Field(default=None, ge=0, le=100)
+
+
+class TacticalSummary(BaseModel):
+    """Tactical total score, health, penalty, and rank history."""
+
+    model_config = ConfigDict(extra="allow")
+
+    rank: float | None = Field(default=None, ge=1)
+    previous_rank: float | None = Field(default=None, ge=1)
+    rank_change: float | None = None
+    score: float | None = None
+    health: float | None = Field(default=None, ge=0, le=100)
+    penalty: float | None = Field(default=None, ge=0)
+
+
+class BaseComponents(BaseModel):
+    momentum: MetricBreakdown
+    volume_expansion: MetricBreakdown
+    beta: MetricBreakdown
+
+
+class TacticalComponents(BaseModel):
+    relative_20d: MetricBreakdown
+    rs_drawdown_63d: MetricBreakdown
+    dma50_distance: MetricBreakdown
+    dma50_slope: MetricBreakdown
+
+
 class RankingRecord(BaseModel):
     """A ranking row with the original Phase 3/5 metrics preserved."""
 
     model_config = ConfigDict(extra="allow")
 
     ticker: str = Field(min_length=1)
+    base: BaseSummary | None = None
+    base_components: BaseComponents | None = None
+    tactical: TacticalSummary | None = None
+    tactical_components: TacticalComponents | None = None
 
 
 class PortfolioRecord(BaseModel):

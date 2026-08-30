@@ -123,11 +123,58 @@ def test_base_ranking_golden_fixture_matches_expected_order_and_scores() -> None
     )
 
     assert excluded == {}
+    legacy_columns = [
+        "ticker",
+        "momentum_raw",
+        "momentum_score",
+        "volume_expansion_raw",
+        "volume_score",
+        "beta_raw",
+        "beta_score",
+        "base_score",
+        "base_rank",
+    ]
     pd.testing.assert_frame_equal(
-        result,
+        result[legacy_columns],
         expected,
         check_dtype=False,
         check_exact=False,
         rtol=1e-12,
         atol=1e-12,
     )
+    assert result["momentum_rank"].tolist() == [1.0, 2.0, 3.0]
+    assert result["volume_expansion_rank"].tolist() == [1.0, 2.0, 3.0]
+    assert result["beta_rank"].tolist() == [2.0, 2.0, 2.0]
+    assert result[["base_previous_rank", "base_rank_change"]].isna().all().all()
+
+
+def test_base_component_rank_history_uses_average_rank_and_improvement_sign() -> None:
+    tickers, prices, benchmark = build_golden_inputs()
+    previous = pd.DataFrame(
+        {
+            "ticker": ["AAA", "BBB", "CCC"],
+            "momentum_score": [50.0, 100.0, 0.0],
+            "volume_score": [50.0, 100.0, 0.0],
+            "beta_score": [50.0, 50.0, 50.0],
+            "base_score": [50.0, 87.5, 12.5],
+            "base_rank": [2.0, 1.0, 3.0],
+        }
+    )
+
+    result, excluded = calculate_base_ranking(
+        tickers,
+        prices,
+        benchmark,
+        "SPY",
+        previous_ranking=previous,
+    )
+
+    assert excluded == {}
+    aaa = result.loc[result["ticker"] == "AAA"].iloc[0]
+    bbb = result.loc[result["ticker"] == "BBB"].iloc[0]
+    assert aaa["momentum_previous_rank"] == 2.0
+    assert aaa["momentum_rank_change"] == 1.0
+    assert bbb["momentum_previous_rank"] == 1.0
+    assert bbb["momentum_rank_change"] == -1.0
+    assert aaa["base_previous_rank"] == 2.0
+    assert aaa["base_rank_change"] == 1.0
