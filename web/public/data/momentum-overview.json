@@ -1,0 +1,3004 @@
+{
+  "asOf": "2026-02-06",
+  "priceAsOf": "2026-02-06",
+  "cacheUpdatedAt": "2026-02-08 23:09:11",
+  "generatedAt": "2026-09-06T07:45:44.962402+00:00",
+  "source": "momentum_master",
+  "status": "AVAILABLE",
+  "periods": [
+    "1d",
+    "5d",
+    "1mo",
+    "3mo",
+    "6mo",
+    "YTD",
+    "1y"
+  ],
+  "indices": [
+    {
+      "ticker": "^DJI",
+      "name": "ダウ30",
+      "emoji": "📊",
+      "price": 50115.671875,
+      "returns": {
+        "1d": 2.4677668028259276,
+        "5d": 2.501823197463311,
+        "1mo": 2.2850680969682204,
+        "3mo": 5.928160205871785,
+        "6mo": 13.980489645851998,
+        "YTD": 3.5824630151788828,
+        "1y": 11.682654976339624
+      },
+      "error": false
+    },
+    {
+      "ticker": "^GSPC",
+      "name": "S&P500",
+      "emoji": "📈",
+      "price": 6932.2998046875,
+      "returns": {
+        "1d": 1.9695796697335792,
+        "5d": -0.09698734084045234,
+        "1mo": 0.16427891363557315,
+        "3mo": 2.0012354511544888,
+        "6mo": 9.342268212736593,
+        "YTD": 1.076473142421192,
+        "1y": 14.366455503023987
+      },
+      "error": false
+    },
+    {
+      "ticker": "^NDX",
+      "name": "ナス100",
+      "emoji": "💻",
+      "price": 25075.76953125,
+      "returns": {
+        "1d": 2.1470803120934168,
+        "5d": -1.8652700670742035,
+        "1mo": -2.2535787953175066,
+        "3mo": -2.1243526278534977,
+        "6mo": 7.209380800152712,
+        "YTD": -0.5173352041550467,
+        "1y": 15.779777000188835
+      },
+      "error": false
+    },
+    {
+      "ticker": "^RUT",
+      "name": "ラッセル2000",
+      "emoji": "🏭",
+      "price": 2670.340087890625,
+      "returns": {
+        "1d": 3.595918338739317,
+        "5d": 2.1654830957831677,
+        "1mo": 3.6856190017556303,
+        "3mo": 8.339894682301118,
+        "6mo": 20.572357824671197,
+        "YTD": 6.463552602288433,
+        "1y": 15.288210169450078
+      },
+      "error": false
+    },
+    {
+      "ticker": "BTC-USD",
+      "name": "ビットコイン",
+      "emoji": "🪙",
+      "price": 71376.078125,
+      "returns": {
+        "1d": 3.022589301058221,
+        "5d": -5.629074565333216,
+        "1mo": -23.771546040047536,
+        "3mo": -21.049087610511027,
+        "6mo": -42.21191070685923,
+        "YTD": -19.559921230489216,
+        "1y": -32.44234892689147
+      },
+      "error": false
+    },
+    {
+      "ticker": "GC=F",
+      "name": "金",
+      "emoji": "🥇",
+      "price": 4979.7998046875,
+      "returns": {
+        "1d": 2.435510443949853,
+        "5d": 5.640762592594395,
+        "1mo": 11.92322440131139,
+        "3mo": 25.111166082909918,
+        "6mo": 46.45177581912902,
+        "YTD": 15.422768343339682,
+        "1y": 74.36273825936624
+      },
+      "error": false
+    }
+  ],
+  "rankings": {
+    "1d": {
+      "top": [
+        {
+          "ticker": "PLSE",
+          "name": "Pulse Biosciences, Inc",
+          "sector": "🧪 Biotech: Clinical",
+          "price": 20.75,
+          "return": 51.570494054164385,
+          "signal": "⚡🐂🔥",
+          "rvol": 15.815329145657868,
+          "rsi": 74.07407407407408
+        },
+        {
+          "ticker": "LBTYB",
+          "name": "Liberty Global Ltd.",
+          "sector": "Telecom Services",
+          "price": 18.010000228881836,
+          "return": 49.709065907299845,
+          "signal": "⚡🐂🔥🚀",
+          "rvol": 1171.9158878504672,
+          "rsi": 96.6142607151403
+        },
+        {
+          "ticker": "BILL",
+          "name": "BILL Holdings, Inc.",
+          "sector": "💳 FinTech: Infra & B2B",
+          "price": 48.939998626708984,
+          "return": 37.16367210795593,
+          "signal": "⚡",
+          "rvol": 7.5230261838082475,
+          "rsi": 53.39721365311965
+        },
+        {
+          "ticker": "PSNY",
+          "name": "Polestar Automotive Holding UK ",
+          "sector": "⚡ Auto: EV Pure",
+          "price": 19.420000076293945,
+          "return": 31.929345951118105,
+          "signal": "⚡🛒",
+          "rvol": 6.947339039821362,
+          "rsi": 41.67650553885531
+        },
+        {
+          "ticker": "LUMN",
+          "name": "Lumen Technologies, Inc.",
+          "sector": "🌐 AI Infra: Networking & Optical",
+          "price": 8.0600004196167,
+          "return": 29.37400312906206,
+          "signal": "⚡🐻",
+          "rvol": 2.1696944522660297,
+          "rsi": 47.41036318265746
+        },
+        {
+          "ticker": "MSTR",
+          "name": "Strategy Inc",
+          "sector": "🪙 Crypto: Exchange & Staking",
+          "price": 134.92999267578125,
+          "return": 26.114585820992108,
+          "signal": "⚡🐻",
+          "rvol": 2.3538257088851533,
+          "rsi": 33.99108081638536
+        },
+        {
+          "ticker": "APLD",
+          "name": "Applied Digital Corporation",
+          "sector": "💻 Crypto: AI & HPC Pivot",
+          "price": 34.95000076293945,
+          "return": 25.51625650849772,
+          "signal": "🐂🤐",
+          "rvol": 1.098235501825023,
+          "rsi": 46.82148262877229
+        },
+        {
+          "ticker": "BITF",
+          "name": "Bitfarms Ltd.",
+          "sector": "💻 Crypto: AI & HPC Pivot",
+          "price": 2.140000104904175,
+          "return": 25.513199474472327,
+          "signal": "🐻🧊",
+          "rvol": 1.4285494501846971,
+          "rsi": 29.54545372445385
+        },
+        {
+          "ticker": "MARA",
+          "name": "MARA Holdings, Inc.",
+          "sector": "⛏️ Crypto: Pure Miners",
+          "price": 8.239999771118164,
+          "return": 22.43684617778884,
+          "signal": "🐻",
+          "rvol": 1.8052142900860337,
+          "rsi": 30.548634878642005
+        },
+        {
+          "ticker": "ROIV",
+          "name": "Roivant Sciences Ltd.",
+          "sector": "Biotechnology",
+          "price": 25.81999969482422,
+          "return": 22.13812885665183,
+          "signal": "⚡🐂🚀",
+          "rvol": 4.3112494665227326,
+          "rsi": 67.04690362761387
+        }
+      ],
+      "worst": [
+        {
+          "ticker": "STLA",
+          "name": "Stellantis N.V.",
+          "sector": "🚗 Auto: Legacy",
+          "price": 7.28000020980835,
+          "return": -23.68972495892653,
+          "signal": "⚡🐻🧊",
+          "rvol": 5.925724771063278,
+          "rsi": 24.9999974308342
+        },
+        {
+          "ticker": "DOCS",
+          "name": "Doximity, Inc.",
+          "sector": "📱 MedTech: Digital",
+          "price": 27.729999542236328,
+          "return": -16.7767112958774,
+          "signal": "⚡🐻🧊",
+          "rvol": 7.005572845484601,
+          "rsi": 8.31794214165474
+        },
+        {
+          "ticker": "COTY",
+          "name": "Coty Inc.",
+          "sector": "Household & Personal Products",
+          "price": 2.6600000858306885,
+          "return": -15.555555387359032,
+          "signal": "⚡🐻",
+          "rvol": 5.37833006299833,
+          "rsi": 39.22652268467232
+        },
+        {
+          "ticker": "QLYS",
+          "name": "Qualys, Inc.",
+          "sector": "🕵️ Cyber: Challengers",
+          "price": 110.80000305175781,
+          "return": -13.308813732695523,
+          "signal": "⚡🐻🧊",
+          "rvol": 4.482883419909734,
+          "rsi": 22.146711047188163
+        },
+        {
+          "ticker": "ILMN",
+          "name": "Illumina, Inc.",
+          "sector": "🔬 MedTech: Services",
+          "price": 119.72000122070312,
+          "return": -10.395927944163407,
+          "signal": "⚡🐻🧊",
+          "rvol": 2.0621040876000354,
+          "rsi": 28.901296747473367
+        },
+        {
+          "ticker": "RDDT",
+          "name": "Reddit, Inc.",
+          "sector": "🚀 SaaS: AI & Niche Apps",
+          "price": 139.8300018310547,
+          "return": -7.428004630267073,
+          "signal": "⚡🐻🧊",
+          "rvol": 4.128764519654133,
+          "rsi": 8.051159909536779
+        },
+        {
+          "ticker": "FSLR",
+          "name": "First Solar, Inc.",
+          "sector": "☀️ Energy: Solar",
+          "price": 218.72999572753906,
+          "return": -6.669228896614933,
+          "signal": "⚡🐻🤐",
+          "rvol": 2.2323906015324697,
+          "rsi": 36.64244740626722
+        },
+        {
+          "ticker": "VIXY",
+          "name": "VIX Short-Term Futures ETF",
+          "sector": "未分類",
+          "price": 26.709999084472656,
+          "return": -6.016892988144842,
+          "signal": "🐻",
+          "rvol": 1.1220382434950378,
+          "rsi": 53.972794407877444
+        },
+        {
+          "ticker": "DVA",
+          "name": "DaVita Inc.",
+          "sector": "🧬 Biotech: Leaders",
+          "price": 140.8300018310547,
+          "return": -5.622570245954662,
+          "signal": "🐂🔥",
+          "rvol": 1.6286014508714979,
+          "rsi": 79.28908300512238
+        },
+        {
+          "ticker": "AMZN",
+          "name": "Amazon.com, Inc.",
+          "sector": "👑 FANG+",
+          "price": 210.32000732421875,
+          "return": -5.5548048774404535,
+          "signal": "⚡🐻🧊",
+          "rvol": 4.018188751730811,
+          "rsi": 27.832518795138043
+        }
+      ]
+    },
+    "5d": {
+      "top": [
+        {
+          "ticker": "LBTYB",
+          "name": "Liberty Global Ltd.",
+          "sector": "Telecom Services",
+          "price": 18.010000228881836,
+          "return": 63.13406060790345,
+          "signal": "⚡🐂🔥🚀",
+          "rvol": 1171.9158878504672,
+          "rsi": 96.6142607151403
+        },
+        {
+          "ticker": "PLSE",
+          "name": "Pulse Biosciences, Inc",
+          "sector": "🧪 Biotech: Clinical",
+          "price": 20.75,
+          "return": 50.03615411763197,
+          "signal": "⚡🐂🔥",
+          "rvol": 15.815329145657868,
+          "rsi": 74.07407407407408
+        },
+        {
+          "ticker": "SLAB",
+          "name": "Silicon Laboratories, Inc.",
+          "sector": "⚡ Semi: Auto & RF Power",
+          "price": 206.5,
+          "return": 44.96314806874285,
+          "signal": "⚡🐂🔥🚀",
+          "rvol": 2.0021221071950905,
+          "rsi": 76.48083060633462
+        },
+        {
+          "ticker": "LITE",
+          "name": "Lumentum Holdings Inc.",
+          "sector": "🌐 AI Infra: Networking & Optical",
+          "price": 551.989990234375,
+          "return": 40.87127281370842,
+          "signal": "🐂🔥🚀",
+          "rvol": 1.2540746114981711,
+          "rsi": 88.62094977537221
+        },
+        {
+          "ticker": "XPO",
+          "name": "XPO, Inc.",
+          "sector": "🚚 Transport: Logistics",
+          "price": 203.61000061035156,
+          "return": 37.472148923967424,
+          "signal": "⚡🐂🔥🚀",
+          "rvol": 2.5355164622080473,
+          "rsi": 85.92651259086695
+        },
+        {
+          "ticker": "ENPH",
+          "name": "Enphase Energy, Inc.",
+          "sector": "☀️ Energy: Solar",
+          "price": 49.79999923706055,
+          "return": 34.66738738106794,
+          "signal": "🐂🔥",
+          "rvol": 1.1761307049233292,
+          "rsi": 71.37911337444461
+        },
+        {
+          "ticker": "DVA",
+          "name": "DaVita Inc.",
+          "sector": "🧬 Biotech: Leaders",
+          "price": 140.8300018310547,
+          "return": 28.80007915479647,
+          "signal": "🐂🔥",
+          "rvol": 1.6286014508714979,
+          "rsi": 79.28908300512238
+        },
+        {
+          "ticker": "PSNY",
+          "name": "Polestar Automotive Holding UK ",
+          "sector": "⚡ Auto: EV Pure",
+          "price": 19.420000076293945,
+          "return": 28.354262586940838,
+          "signal": "⚡🛒",
+          "rvol": 6.947339039821362,
+          "rsi": 41.67650553885531
+        },
+        {
+          "ticker": "ALM",
+          "name": "Almonty Industries Inc.",
+          "sector": "Other Industrial Metals & Mining",
+          "price": 14.100000381469727,
+          "return": 24.889286351737898,
+          "signal": "🐂🔥🚀",
+          "rvol": 0.7641937902251139,
+          "rsi": 78.85228689280538
+        },
+        {
+          "ticker": "TER",
+          "name": "Teradyne, Inc.",
+          "sector": "🤖 Robotics: Industrial",
+          "price": 300.1099853515625,
+          "return": 24.50113318900205,
+          "signal": "🐂🔥🚀",
+          "rvol": 1.364011959771677,
+          "rsi": 76.60062194860836
+        }
+      ],
+      "worst": [
+        {
+          "ticker": "FLNC",
+          "name": "Fluence Energy, Inc.",
+          "sector": "🔋 Energy: H2 & Battery",
+          "price": 19.440000534057617,
+          "return": -36.82157866477168,
+          "signal": "🐻",
+          "rvol": 1.8247985047230098,
+          "rsi": 34.29276175188119
+        },
+        {
+          "ticker": "GLXY",
+          "name": "Galaxy Digital Inc.",
+          "sector": "🪙 Crypto: Exchange & Staking",
+          "price": 19.760000228881836,
+          "return": -30.077848305581277,
+          "signal": "🐻🧊",
+          "rvol": 1.458217259741377,
+          "rsi": 22.905030036296452
+        },
+        {
+          "ticker": "FIGR",
+          "name": "Figure Technology Solutions, In",
+          "sector": "🪙 Crypto: Exchange & Staking",
+          "price": 41.27000045776367,
+          "return": -27.443741767265777,
+          "signal": "🧊",
+          "rvol": 0.616019123636774,
+          "rsi": 15.663795304335807
+        },
+        {
+          "ticker": "STLA",
+          "name": "Stellantis N.V.",
+          "sector": "🚗 Auto: Legacy",
+          "price": 7.28000020980835,
+          "return": -26.241131770834087,
+          "signal": "⚡🐻🧊",
+          "rvol": 5.925724771063278,
+          "rsi": 24.9999974308342
+        },
+        {
+          "ticker": "DOCS",
+          "name": "Doximity, Inc.",
+          "sector": "📱 MedTech: Digital",
+          "price": 27.729999542236328,
+          "return": -25.994132268896745,
+          "signal": "⚡🐻🧊",
+          "rvol": 7.005572845484601,
+          "rsi": 8.31794214165474
+        },
+        {
+          "ticker": "IT",
+          "name": "Gartner, Inc.",
+          "sector": "Information Technology Services",
+          "price": 156.3300018310547,
+          "return": -25.41863395074369,
+          "signal": "🐻🧊",
+          "rvol": 1.3979536107515396,
+          "rsi": 19.819749055122188
+        },
+        {
+          "ticker": "SNAP",
+          "name": "Snap Inc.",
+          "sector": " 👓 Future Tech: AR/VR & Wearables",
+          "price": 5.21999979019165,
+          "return": -24.67532583701265,
+          "signal": "🐻🧊",
+          "rvol": 1.668622874841144,
+          "rsi": 17.464784570356315
+        },
+        {
+          "ticker": "VRNS",
+          "name": "Varonis Systems, Inc.",
+          "sector": "🕵️ Cyber: Challengers",
+          "price": 22.649999618530273,
+          "return": -24.095175929260375,
+          "signal": "🐻🧊",
+          "rvol": 1.3158509839416348,
+          "rsi": 19.568857921815976
+        },
+        {
+          "ticker": "PYPL",
+          "name": "PayPal Holdings, Inc.",
+          "sector": "📱 FinTech: Consumer",
+          "price": 40.41999816894531,
+          "return": -23.2871527378327,
+          "signal": "🐻🧊",
+          "rvol": 1.3385543657362746,
+          "rsi": 11.963034956380284
+        },
+        {
+          "ticker": "LAZR",
+          "name": "Luminar Technologies, Inc.",
+          "sector": "🤖 Auto: Tech",
+          "price": 0.06128999963402748,
+          "return": -23.0025119501792,
+          "signal": "⚡🐻🤐",
+          "rvol": 3.4192125326076965,
+          "rsi": 41.09179821530005
+        }
+      ]
+    },
+    "1mo": {
+      "top": [
+        {
+          "ticker": "ERAS",
+          "name": "Erasca, Inc.",
+          "sector": "Biotechnology",
+          "price": 12.289999961853027,
+          "return": 137.71759730152598,
+          "signal": "🐂🔥🤐🚀",
+          "rvol": 0.5110122322506474,
+          "rsi": 77.69709798074291
+        },
+        {
+          "ticker": "MOD",
+          "name": "Modine Manufacturing Company",
+          "sector": "❄️ AI Infra: Power & Cooling",
+          "price": 215.72000122070312,
+          "return": 80.24732676356278,
+          "signal": "🐂🔥🚀",
+          "rvol": 1.3465862587570654,
+          "rsi": 95.77332377503605
+        },
+        {
+          "ticker": "SNDK",
+          "name": "Sandisk Corporation",
+          "sector": "💾 AI Infra: Storage & Memory",
+          "price": 597.9500122070312,
+          "return": 69.1226429279336,
+          "signal": "🐂",
+          "rvol": 1.020432610117903,
+          "rsi": 68.87737351454734
+        },
+        {
+          "ticker": "LBTYB",
+          "name": "Liberty Global Ltd.",
+          "sector": "Telecom Services",
+          "price": 18.010000228881836,
+          "return": 61.960435379773784,
+          "signal": "⚡🐂🔥🚀",
+          "rvol": 1171.9158878504672,
+          "rsi": 96.6142607151403
+        },
+        {
+          "ticker": "ALM",
+          "name": "Almonty Industries Inc.",
+          "sector": "Other Industrial Metals & Mining",
+          "price": 14.100000381469727,
+          "return": 48.26498467001164,
+          "signal": "🐂🔥🚀",
+          "rvol": 0.7641937902251139,
+          "rsi": 78.85228689280538
+        },
+        {
+          "ticker": "TROX",
+          "name": "Tronox Holdings plc",
+          "sector": "🔋 Resources: Battery Chain",
+          "price": 7.460000038146973,
+          "return": 46.850396657183744,
+          "signal": "🐂🤐",
+          "rvol": 0.963691826442806,
+          "rsi": 68.04979446043849
+        },
+        {
+          "ticker": "ALMS",
+          "name": "Alumis Inc.",
+          "sector": "Biotechnology",
+          "price": 26.190000534057617,
+          "return": 46.149555929432786,
+          "signal": "🐂🤐",
+          "rvol": 0.524863365427057,
+          "rsi": 57.57970193483617
+        },
+        {
+          "ticker": "GOLD",
+          "name": "Gold.com, Inc.",
+          "sector": "🥇 Resources: Gold Majors",
+          "price": 55.31999969482422,
+          "return": 46.040121792363855,
+          "signal": "🐂🔥🚀",
+          "rvol": 1.5112352110188947,
+          "rsi": 76.83073018551885
+        },
+        {
+          "ticker": "ENPH",
+          "name": "Enphase Energy, Inc.",
+          "sector": "☀️ Energy: Solar",
+          "price": 49.79999923706055,
+          "return": 43.557224584949594,
+          "signal": "🐂🔥",
+          "rvol": 1.1761307049233292,
+          "rsi": 71.37911337444461
+        },
+        {
+          "ticker": "SLAB",
+          "name": "Silicon Laboratories, Inc.",
+          "sector": "⚡ Semi: Auto & RF Power",
+          "price": 206.5,
+          "return": 42.659758203799655,
+          "signal": "⚡🐂🔥🚀",
+          "rvol": 2.0021221071950905,
+          "rsi": 76.48083060633462
+        }
+      ],
+      "worst": [
+        {
+          "ticker": "MNTS",
+          "name": "Momentus Inc.",
+          "sector": "☄️ Space: Speculative",
+          "price": 6.0,
+          "return": -56.83453118947342,
+          "signal": "🐻🧊🤐",
+          "rvol": 1.3100804099857537,
+          "rsi": 29.91329694854541
+        },
+        {
+          "ticker": "SIDU",
+          "name": "Sidus Space, Inc.",
+          "sector": "☄️ Space: Speculative",
+          "price": 2.4200000762939453,
+          "return": -47.844824441193595,
+          "signal": "🐂🛒🤐",
+          "rvol": 0.3185449387534396,
+          "rsi": 39.806869708553265
+        },
+        {
+          "ticker": "RDDT",
+          "name": "Reddit, Inc.",
+          "sector": "🚀 SaaS: AI & Niche Apps",
+          "price": 139.8300018310547,
+          "return": -45.27201493892184,
+          "signal": "⚡🐻🧊",
+          "rvol": 4.128764519654133,
+          "rsi": 8.051159909536779
+        },
+        {
+          "ticker": "U",
+          "name": "Unity Software Inc.",
+          "sector": "🎮 Consumer: Media",
+          "price": 25.110000610351562,
+          "return": -44.642856542155265,
+          "signal": "🐻🧊",
+          "rvol": 1.1608934903815586,
+          "rsi": 16.63858670457583
+        },
+        {
+          "ticker": "HUBS",
+          "name": "HubSpot, Inc.",
+          "sector": "📝 SaaS: Productivity",
+          "price": 232.5800018310547,
+          "return": -41.59509790615634,
+          "signal": "🐻🧊",
+          "rvol": 1.4689509565329508,
+          "rsi": 23.71037552393294
+        },
+        {
+          "ticker": "TEAM",
+          "name": "Atlassian Corporation",
+          "sector": "🏰 SaaS: Enterprise Giants",
+          "price": 94.72000122070312,
+          "return": -41.12015658873906,
+          "signal": "⚡🐻",
+          "rvol": 2.5044547766151593,
+          "rsi": 32.074619081222124
+        },
+        {
+          "ticker": "FIG",
+          "name": "Figma, Inc.",
+          "sector": "Software - Application",
+          "price": 21.989999771118164,
+          "return": -40.98228459014782,
+          "signal": "🐻🧊",
+          "rvol": 1.0229229808420355,
+          "rsi": 27.990712698077076
+        },
+        {
+          "ticker": "DOCS",
+          "name": "Doximity, Inc.",
+          "sector": "📱 MedTech: Digital",
+          "price": 27.729999542236328,
+          "return": -40.35276717341938,
+          "signal": "⚡🐻🧊",
+          "rvol": 7.005572845484601,
+          "rsi": 8.31794214165474
+        },
+        {
+          "ticker": "BTCS",
+          "name": "BTCS Inc.",
+          "sector": "🪙 Crypto: Exchange & Staking",
+          "price": 1.7300000190734863,
+          "return": -39.510486624842265,
+          "signal": "⚡🐻🧊",
+          "rvol": 3.7529631310838756,
+          "rsi": 14.110429627323995
+        },
+        {
+          "ticker": "SNAP",
+          "name": "Snap Inc.",
+          "sector": " 👓 Future Tech: AR/VR & Wearables",
+          "price": 5.21999979019165,
+          "return": -39.44315708244249,
+          "signal": "🐻🧊",
+          "rvol": 1.668622874841144,
+          "rsi": 17.464784570356315
+        }
+      ]
+    },
+    "3mo": {
+      "top": [
+        {
+          "ticker": "ALMS",
+          "name": "Alumis Inc.",
+          "sector": "Biotechnology",
+          "price": 26.190000534057617,
+          "return": 473.08532932804053,
+          "signal": "🐂🤐",
+          "rvol": 0.524863365427057,
+          "rsi": 57.57970193483617
+        },
+        {
+          "ticker": "ERAS",
+          "name": "Erasca, Inc.",
+          "sector": "Biotechnology",
+          "price": 12.289999961853027,
+          "return": 458.63634979429355,
+          "signal": "🐂🔥🤐🚀",
+          "rvol": 0.5110122322506474,
+          "rsi": 77.69709798074291
+        },
+        {
+          "ticker": "HYMC",
+          "name": "Hycroft Mining Holding Corporat",
+          "sector": "🧨 Resources: Junior Miners",
+          "price": 34.59000015258789,
+          "return": 368.69918179138546,
+          "signal": "🐂🤐",
+          "rvol": 0.6487103688978116,
+          "rsi": 49.96897229592346
+        },
+        {
+          "ticker": "OLMA",
+          "name": "Olema Pharmaceuticals, Inc.",
+          "sector": "Biotechnology",
+          "price": 25.360000610351562,
+          "return": 218.99372602243784,
+          "signal": "🤐",
+          "rvol": 0.7174573585609096,
+          "rsi": 40.24123361970057
+        },
+        {
+          "ticker": "SNDK",
+          "name": "Sandisk Corporation",
+          "sector": "💾 AI Infra: Storage & Memory",
+          "price": 597.9500122070312,
+          "return": 176.18938208176965,
+          "signal": "🐂",
+          "rvol": 1.020432610117903,
+          "rsi": 68.87737351454734
+        },
+        {
+          "ticker": "COGT",
+          "name": "Cogent Biosciences, Inc.",
+          "sector": "Biotechnology",
+          "price": 37.08000183105469,
+          "return": 157.1428684803762,
+          "signal": "🤐",
+          "rvol": 0.8334881795494798,
+          "rsi": 43.496514353532824
+        },
+        {
+          "ticker": "TROX",
+          "name": "Tronox Holdings plc",
+          "sector": "🔋 Resources: Battery Chain",
+          "price": 7.460000038146973,
+          "return": 137.3254750490321,
+          "signal": "🐂🤐",
+          "rvol": 0.963691826442806,
+          "rsi": 68.04979446043849
+        },
+        {
+          "ticker": "LITE",
+          "name": "Lumentum Holdings Inc.",
+          "sector": "🌐 AI Infra: Networking & Optical",
+          "price": 551.989990234375,
+          "return": 137.160038768797,
+          "signal": "🐂🔥🚀",
+          "rvol": 1.2540746114981711,
+          "rsi": 88.62094977537221
+        },
+        {
+          "ticker": "SGML",
+          "name": "Sigma Lithium Corporation",
+          "sector": "🔋 Resources: Battery Chain",
+          "price": 12.220000267028809,
+          "return": 136.82171760445877,
+          "signal": null,
+          "rvol": 0.3894590503931681,
+          "rsi": 49.79044344738975
+        },
+        {
+          "ticker": "SIDU",
+          "name": "Sidus Space, Inc.",
+          "sector": "☄️ Space: Speculative",
+          "price": 2.4200000762939453,
+          "return": 132.69232356336752,
+          "signal": "🐂🛒🤐",
+          "rvol": 0.3185449387534396,
+          "rsi": 39.806869708553265
+        }
+      ],
+      "worst": [
+        {
+          "ticker": "LAZR",
+          "name": "Luminar Technologies, Inc.",
+          "sector": "🤖 Auto: Tech",
+          "price": 0.06128999963402748,
+          "return": -95.05725813204428,
+          "signal": "⚡🐻🤐",
+          "rvol": 3.4192125326076965,
+          "rsi": 41.09179821530005
+        },
+        {
+          "ticker": "FRMI",
+          "name": "Fermi Inc.",
+          "sector": "未分類",
+          "price": 8.0,
+          "return": -69.75425418055472,
+          "signal": "🐻",
+          "rvol": 0.7724921890035912,
+          "rsi": 35.455172098670346
+        },
+        {
+          "ticker": "MNTS",
+          "name": "Momentus Inc.",
+          "sector": "☄️ Space: Speculative",
+          "price": 6.0,
+          "return": -68.59813173673736,
+          "signal": "🐻🧊🤐",
+          "rvol": 1.3100804099857537,
+          "rsi": 29.91329694854541
+        },
+        {
+          "ticker": "DOCS",
+          "name": "Doximity, Inc.",
+          "sector": "📱 MedTech: Digital",
+          "price": 27.729999542236328,
+          "return": -56.66510577453584,
+          "signal": "⚡🐻🧊",
+          "rvol": 7.005572845484601,
+          "rsi": 8.31794214165474
+        },
+        {
+          "ticker": "CAN",
+          "name": "Canaan Inc.",
+          "sector": "🪙 Crypto: Exchange & Staking",
+          "price": 0.5899999737739563,
+          "return": -54.26356657201388,
+          "signal": "🐻🧊",
+          "rvol": 1.2592188219696878,
+          "rsi": 29.227561282024737
+        },
+        {
+          "ticker": "HIVE",
+          "name": "HIVE Digital Technologies Ltd",
+          "sector": "💻 Crypto: AI & HPC Pivot",
+          "price": 2.3299999237060547,
+          "return": -54.133859080725536,
+          "signal": "🐻🧊💀",
+          "rvol": 0.9413651592105895,
+          "rsi": 24.999997385761162
+        },
+        {
+          "ticker": "DUOL",
+          "name": "Duolingo, Inc.",
+          "sector": "🚀 SaaS: AI & Niche Apps",
+          "price": 119.4000015258789,
+          "return": -54.08045282257095,
+          "signal": "🐻🧊",
+          "rvol": 0.892084088296608,
+          "rsi": 24.024669179387587
+        },
+        {
+          "ticker": "SMR",
+          "name": "NuScale Power Corporation",
+          "sector": "⚛️ Nuclear: Fuel & Tech",
+          "price": 17.530000686645508,
+          "return": -53.75890066683243,
+          "signal": "🐻",
+          "rvol": 1.1311482002247735,
+          "rsi": 42.72428877176757
+        },
+        {
+          "ticker": "RGTI",
+          "name": "Rigetti Computing, Inc.",
+          "sector": "⚛️ Tech: Quantum",
+          "price": 17.709999084472656,
+          "return": -52.507378252441086,
+          "signal": "🐻🧊",
+          "rvol": 1.1263619257185948,
+          "rsi": 28.100765062433993
+        },
+        {
+          "ticker": "MARA",
+          "name": "MARA Holdings, Inc.",
+          "sector": "⛏️ Crypto: Pure Miners",
+          "price": 8.239999771118164,
+          "return": -51.89725525503523,
+          "signal": "🐻",
+          "rvol": 1.8052142900860337,
+          "rsi": 30.548634878642005
+        }
+      ]
+    },
+    "6mo": {
+      "top": [
+        {
+          "ticker": "SNDK",
+          "name": "Sandisk Corporation",
+          "sector": "💾 AI Infra: Storage & Memory",
+          "price": 597.9500122070312,
+          "return": 1369.5257615824441,
+          "signal": "🐂",
+          "rvol": 1.020432610117903,
+          "rsi": 68.87737351454734
+        },
+        {
+          "ticker": "HYMC",
+          "name": "Hycroft Mining Holding Corporat",
+          "sector": "🧨 Resources: Junior Miners",
+          "price": 34.59000015258789,
+          "return": 899.7109760470642,
+          "signal": "🐂🤐",
+          "rvol": 0.6487103688978116,
+          "rsi": 49.96897229592346
+        },
+        {
+          "ticker": "ERAS",
+          "name": "Erasca, Inc.",
+          "sector": "Biotechnology",
+          "price": 12.289999961853027,
+          "return": 741.7807973108997,
+          "signal": "🐂🔥🤐🚀",
+          "rvol": 0.5110122322506474,
+          "rsi": 77.69709798074291
+        },
+        {
+          "ticker": "TERN",
+          "name": "Terns Pharmaceuticals, Inc.",
+          "sector": "Biotechnology",
+          "price": 37.77000045776367,
+          "return": 569.6808750334061,
+          "signal": "🐂🤐",
+          "rvol": 0.7481878227657629,
+          "rsi": 54.17559871863117
+        },
+        {
+          "ticker": "ALMS",
+          "name": "Alumis Inc.",
+          "sector": "Biotechnology",
+          "price": 26.190000534057617,
+          "return": 504.849907517817,
+          "signal": "🐂🤐",
+          "rvol": 0.524863365427057,
+          "rsi": 57.57970193483617
+        },
+        {
+          "ticker": "OLMA",
+          "name": "Olema Pharmaceuticals, Inc.",
+          "sector": "Biotechnology",
+          "price": 25.360000610351562,
+          "return": 437.2881724073519,
+          "signal": "🤐",
+          "rvol": 0.7174573585609096,
+          "rsi": 40.24123361970057
+        },
+        {
+          "ticker": "LITE",
+          "name": "Lumentum Holdings Inc.",
+          "sector": "🌐 AI Infra: Networking & Optical",
+          "price": 551.989990234375,
+          "return": 396.7065633733719,
+          "signal": "🐂🔥🚀",
+          "rvol": 1.2540746114981711,
+          "rsi": 88.62094977537221
+        },
+        {
+          "ticker": "SATS",
+          "name": "EchoStar Corporation",
+          "sector": "🚀 Space: Leaders",
+          "price": 111.61000061035156,
+          "return": 308.0804352967029,
+          "signal": "🐂🛒",
+          "rvol": 0.5167246851155812,
+          "rsi": 39.79699729900312
+        },
+        {
+          "ticker": "BE",
+          "name": "Bloom Energy Corporation",
+          "sector": "🔋 Energy: H2 & Battery",
+          "price": 143.02999877929688,
+          "return": 288.6684830016361,
+          "signal": "🐂🤐",
+          "rvol": 1.5997669859510288,
+          "rsi": 47.07001131867388
+        },
+        {
+          "ticker": "WDC",
+          "name": "Western Digital Corporation",
+          "sector": "💾 AI Infra: Storage & Memory",
+          "price": 282.5799865722656,
+          "return": 280.35520252212376,
+          "signal": "🐂",
+          "rvol": 0.92291067021349,
+          "rsi": 65.74699492488443
+        }
+      ],
+      "worst": [
+        {
+          "ticker": "LAZR",
+          "name": "Luminar Technologies, Inc.",
+          "sector": "🤖 Auto: Tech",
+          "price": 0.06128999963402748,
+          "return": -97.60585933578258,
+          "signal": "⚡🐻🤐",
+          "rvol": 3.4192125326076965,
+          "rsi": 41.09179821530005
+        },
+        {
+          "ticker": "FIG",
+          "name": "Figma, Inc.",
+          "sector": "Software - Application",
+          "price": 21.989999771118164,
+          "return": -71.89417130429008,
+          "signal": "🐻🧊",
+          "rvol": 1.0229229808420355,
+          "rsi": 27.990712698077076
+        },
+        {
+          "ticker": "MNTS",
+          "name": "Momentus Inc.",
+          "sector": "☄️ Space: Speculative",
+          "price": 6.0,
+          "return": -70.78260714496683,
+          "signal": "🐻🧊🤐",
+          "rvol": 1.3100804099857537,
+          "rsi": 29.91329694854541
+        },
+        {
+          "ticker": "DUOL",
+          "name": "Duolingo, Inc.",
+          "sector": "🚀 SaaS: AI & Niche Apps",
+          "price": 119.4000015258789,
+          "return": -69.45041381520873,
+          "signal": "🐻🧊",
+          "rvol": 0.892084088296608,
+          "rsi": 24.024669179387587
+        },
+        {
+          "ticker": "TTD",
+          "name": "The Trade Desk, Inc.",
+          "sector": "🏰 SaaS: Enterprise Giants",
+          "price": 27.040000915527344,
+          "return": -69.38752365561399,
+          "signal": "🐻🧊",
+          "rvol": 0.9621319705540994,
+          "rsi": 22.87917753545021
+        },
+        {
+          "ticker": "MSTR",
+          "name": "Strategy Inc",
+          "sector": "🪙 Crypto: Exchange & Staking",
+          "price": 134.92999267578125,
+          "return": -66.43616094175204,
+          "signal": "⚡🐻",
+          "rvol": 2.3538257088851533,
+          "rsi": 33.99108081638536
+        },
+        {
+          "ticker": "CRCL",
+          "name": "Circle Internet Group, Inc.",
+          "sector": "🪙 Crypto: Exchange & Staking",
+          "price": 57.040000915527344,
+          "return": -62.701887368519785,
+          "signal": "🐻🧊",
+          "rvol": 1.4967738939725324,
+          "rsi": 23.66300207288522
+        },
+        {
+          "ticker": "BTCS",
+          "name": "BTCS Inc.",
+          "sector": "🪙 Crypto: Exchange & Staking",
+          "price": 1.7300000190734863,
+          "return": -61.1255262359916,
+          "signal": "⚡🐻🧊",
+          "rvol": 3.7529631310838756,
+          "rsi": 14.110429627323995
+        },
+        {
+          "ticker": "SMR",
+          "name": "NuScale Power Corporation",
+          "sector": "⚛️ Nuclear: Fuel & Tech",
+          "price": 17.530000686645508,
+          "return": -60.765441882472835,
+          "signal": "🐻",
+          "rvol": 1.1311482002247735,
+          "rsi": 42.72428877176757
+        },
+        {
+          "ticker": "MNDY",
+          "name": "monday.com Ltd.",
+          "sector": "Software - Application",
+          "price": 98.0,
+          "return": -60.38803459267482,
+          "signal": "🐻🧊",
+          "rvol": 1.858854174872514,
+          "rsi": 21.39156088288003
+        }
+      ]
+    },
+    "YTD": {
+      "top": [
+        {
+          "ticker": "ERAS",
+          "name": "Erasca, Inc.",
+          "sector": "Biotechnology",
+          "price": 12.289999961853027,
+          "return": 230.3763405196666,
+          "signal": "🐂🔥🤐🚀",
+          "rvol": 0.5110122322506474,
+          "rsi": 77.69709798074291
+        },
+        {
+          "ticker": "ALMS",
+          "name": "Alumis Inc.",
+          "sector": "Biotechnology",
+          "price": 26.190000534057617,
+          "return": 168.3401631134808,
+          "signal": "🐂🤐",
+          "rvol": 0.524863365427057,
+          "rsi": 57.57970193483617
+        },
+        {
+          "ticker": "SNDK",
+          "name": "Sandisk Corporation",
+          "sector": "💾 AI Infra: Storage & Memory",
+          "price": 597.9500122070312,
+          "return": 151.8956946277853,
+          "signal": "🐂",
+          "rvol": 1.020432610117903,
+          "rsi": 68.87737351454734
+        },
+        {
+          "ticker": "USAR",
+          "name": "USA Rare Earth, Inc.",
+          "sector": "🧲 Resources: Strategic",
+          "price": 21.84000015258789,
+          "return": 83.52941893022742,
+          "signal": "🐂",
+          "rvol": 0.5512181114980678,
+          "rsi": 58.363563776606306
+        },
+        {
+          "ticker": "TROX",
+          "name": "Tronox Holdings plc",
+          "sector": "🔋 Resources: Battery Chain",
+          "price": 7.460000038146973,
+          "return": 78.89688013571906,
+          "signal": "🐂🤐",
+          "rvol": 0.963691826442806,
+          "rsi": 68.04979446043849
+        },
+        {
+          "ticker": "UAMY",
+          "name": "United States Antimony Corporat",
+          "sector": "🧲 Resources: Strategic",
+          "price": 8.609999656677246,
+          "return": 71.51393803567598,
+          "signal": "🐂🤐",
+          "rvol": 0.6522311737617962,
+          "rsi": 51.2441666248291
+        },
+        {
+          "ticker": "PDYN",
+          "name": "Palladyne AI Corp.",
+          "sector": "🚁 Defense: Drones",
+          "price": 7.159999847412109,
+          "return": 68.07510475865548,
+          "signal": "🐂🤐",
+          "rvol": 0.49376164800614586,
+          "rsi": 52.604827846615215
+        },
+        {
+          "ticker": "BE",
+          "name": "Bloom Energy Corporation",
+          "sector": "🔋 Energy: H2 & Battery",
+          "price": 143.02999877929688,
+          "return": 64.61042672804602,
+          "signal": "🐂🤐",
+          "rvol": 1.5997669859510288,
+          "rsi": 47.07001131867388
+        },
+        {
+          "ticker": "WDC",
+          "name": "Western Digital Corporation",
+          "sector": "💾 AI Infra: Storage & Memory",
+          "price": 282.5799865722656,
+          "return": 64.03319182911218,
+          "signal": "🐂",
+          "rvol": 0.92291067021349,
+          "rsi": 65.74699492488443
+        },
+        {
+          "ticker": "GOLD",
+          "name": "Gold.com, Inc.",
+          "sector": "🥇 Resources: Gold Majors",
+          "price": 55.31999969482422,
+          "return": 62.466963096472185,
+          "signal": "🐂🔥🚀",
+          "rvol": 1.5112352110188947,
+          "rsi": 76.83073018551885
+        }
+      ],
+      "worst": [
+        {
+          "ticker": "U",
+          "name": "Unity Software Inc.",
+          "sector": "🎮 Consumer: Media",
+          "price": 25.110000610351562,
+          "return": -43.1514565286858,
+          "signal": "🐻🧊",
+          "rvol": 1.1608934903815586,
+          "rsi": 16.63858670457583
+        },
+        {
+          "ticker": "HUBS",
+          "name": "HubSpot, Inc.",
+          "sector": "📝 SaaS: Productivity",
+          "price": 232.5800018310547,
+          "return": -42.04335686373281,
+          "signal": "🐻🧊",
+          "rvol": 1.4689509565329508,
+          "rsi": 23.71037552393294
+        },
+        {
+          "ticker": "TEAM",
+          "name": "Atlassian Corporation",
+          "sector": "🏰 SaaS: Enterprise Giants",
+          "price": 94.72000122070312,
+          "return": -41.581348478313636,
+          "signal": "⚡🐻",
+          "rvol": 2.5044547766151593,
+          "rsi": 32.074619081222124
+        },
+        {
+          "ticker": "FIG",
+          "name": "Figma, Inc.",
+          "sector": "Software - Application",
+          "price": 21.989999771118164,
+          "return": -41.15600642322766,
+          "signal": "🐻🧊",
+          "rvol": 1.0229229808420355,
+          "rsi": 27.990712698077076
+        },
+        {
+          "ticker": "KVYO",
+          "name": "Klaviyo, Inc. Series A",
+          "sector": "🚀 SaaS: AI & Niche Apps",
+          "price": 19.139999389648438,
+          "return": -41.05328404655364,
+          "signal": "🐻",
+          "rvol": 1.3335670638534198,
+          "rsi": 32.40601288105745
+        },
+        {
+          "ticker": "APP",
+          "name": "Applovin Corporation",
+          "sector": "🏰 SaaS: Enterprise Giants",
+          "price": 406.7200012207031,
+          "return": -39.63966685468222,
+          "signal": "🐻🧊",
+          "rvol": 0.9722091408515758,
+          "rsi": 26.29607959855369
+        },
+        {
+          "ticker": "RDDT",
+          "name": "Reddit, Inc.",
+          "sector": "🚀 SaaS: AI & Niche Apps",
+          "price": 139.8300018310547,
+          "return": -39.169963544059115,
+          "signal": "⚡🐻🧊",
+          "rvol": 4.128764519654133,
+          "rsi": 8.051159909536779
+        },
+        {
+          "ticker": "IT",
+          "name": "Gartner, Inc.",
+          "sector": "Information Technology Services",
+          "price": 156.3300018310547,
+          "return": -38.03313675777464,
+          "signal": "🐻🧊",
+          "rvol": 1.3979536107515396,
+          "rsi": 19.819749055122188
+        },
+        {
+          "ticker": "DOCS",
+          "name": "Doximity, Inc.",
+          "sector": "📱 MedTech: Digital",
+          "price": 27.729999542236328,
+          "return": -37.37578973195117,
+          "signal": "⚡🐻🧊",
+          "rvol": 7.005572845484601,
+          "rsi": 8.31794214165474
+        },
+        {
+          "ticker": "ASAN",
+          "name": "Asana, Inc.",
+          "sector": "📝 SaaS: Productivity",
+          "price": 8.760000228881836,
+          "return": -36.105031331087964,
+          "signal": "🐻🧊",
+          "rvol": 1.1448482621927711,
+          "rsi": 25.72706476921718
+        }
+      ]
+    },
+    "1y": {
+      "top": [
+        {
+          "ticker": "ABVX",
+          "name": "Abivax SA",
+          "sector": "Biotechnology",
+          "price": 117.66999816894531,
+          "return": 1767.7776921657476,
+          "signal": "🤐",
+          "rvol": 0.43532008258525506,
+          "rsi": 50.911999734374945
+        },
+        {
+          "ticker": "SNDK",
+          "name": "Sandisk Corporation",
+          "sector": "💾 AI Infra: Storage & Memory",
+          "price": 597.9500122070312,
+          "return": 1560.9722561306423,
+          "signal": "🐂",
+          "rvol": 1.020432610117903,
+          "rsi": 68.87737351454734
+        },
+        {
+          "ticker": "HYMC",
+          "name": "Hycroft Mining Holding Corporat",
+          "sector": "🧨 Resources: Junior Miners",
+          "price": 34.59000015258789,
+          "return": 1256.4706195844503,
+          "signal": "🐂🤐",
+          "rvol": 0.6487103688978116,
+          "rsi": 49.96897229592346
+        },
+        {
+          "ticker": "CELC",
+          "name": "Celcuity Inc.",
+          "sector": "Biotechnology",
+          "price": 106.75,
+          "return": 771.4285714285714,
+          "signal": "🐂",
+          "rvol": 0.7848588668753883,
+          "rsi": 49.6925341597062
+        },
+        {
+          "ticker": "TERN",
+          "name": "Terns Pharmaceuticals, Inc.",
+          "sector": "Biotechnology",
+          "price": 37.77000045776367,
+          "return": 743.080363771403,
+          "signal": "🐂🤐",
+          "rvol": 0.7481878227657629,
+          "rsi": 54.17559871863117
+        },
+        {
+          "ticker": "ERAS",
+          "name": "Erasca, Inc.",
+          "sector": "Biotechnology",
+          "price": 12.289999961853027,
+          "return": 672.955956217053,
+          "signal": "🐂🔥🤐🚀",
+          "rvol": 0.5110122322506474,
+          "rsi": 77.69709798074291
+        },
+        {
+          "ticker": "LITE",
+          "name": "Lumentum Holdings Inc.",
+          "sector": "🌐 AI Infra: Networking & Optical",
+          "price": 551.989990234375,
+          "return": 542.5960191258881,
+          "signal": "🐂🔥🚀",
+          "rvol": 1.2540746114981711,
+          "rsi": 88.62094977537221
+        },
+        {
+          "ticker": "WDC",
+          "name": "Western Digital Corporation",
+          "sector": "💾 AI Infra: Storage & Memory",
+          "price": 282.5799865722656,
+          "return": 482.20206045036724,
+          "signal": "🐂",
+          "rvol": 0.92291067021349,
+          "rsi": 65.74699492488443
+        },
+        {
+          "ticker": "BE",
+          "name": "Bloom Energy Corporation",
+          "sector": "🔋 Energy: H2 & Battery",
+          "price": 143.02999877929688,
+          "return": 477.1993333978353,
+          "signal": "🐂🤐",
+          "rvol": 1.5997669859510288,
+          "rsi": 47.07001131867388
+        },
+        {
+          "ticker": "USAS",
+          "name": "Americas Gold and Silver Corpor",
+          "sector": "🧨 Resources: Junior Miners",
+          "price": 7.130000114440918,
+          "return": 418.5454628684304,
+          "signal": "🐂",
+          "rvol": 0.5395631496450524,
+          "rsi": 54.03726877315808
+        }
+      ],
+      "worst": [
+        {
+          "ticker": "LAZR",
+          "name": "Luminar Technologies, Inc.",
+          "sector": "🤖 Auto: Tech",
+          "price": 0.06128999963402748,
+          "return": -98.87334560681342,
+          "signal": "⚡🐻🤐",
+          "rvol": 3.4192125326076965,
+          "rsi": 41.09179821530005
+        },
+        {
+          "ticker": "MNTS",
+          "name": "Momentus Inc.",
+          "sector": "☄️ Space: Speculative",
+          "price": 6.0,
+          "return": -91.1578943107795,
+          "signal": "🐻🧊🤐",
+          "rvol": 1.3100804099857537,
+          "rsi": 29.91329694854541
+        },
+        {
+          "ticker": "SRPT",
+          "name": "Sarepta Therapeutics, Inc.",
+          "sector": "🧪 Biotech: Clinical",
+          "price": 18.5,
+          "return": -83.45555352308206,
+          "signal": null,
+          "rvol": 0.9950561092364435,
+          "rsi": 38.22739462407546
+        },
+        {
+          "ticker": "FIG",
+          "name": "Figma, Inc.",
+          "sector": "Software - Application",
+          "price": 21.989999771118164,
+          "return": -80.96103915920506,
+          "signal": "🐻🧊",
+          "rvol": 1.0229229808420355,
+          "rsi": 27.990712698077076
+        },
+        {
+          "ticker": "TTD",
+          "name": "The Trade Desk, Inc.",
+          "sector": "🏰 SaaS: Enterprise Giants",
+          "price": 27.040000915527344,
+          "return": -76.94603060409075,
+          "signal": "🐻🧊",
+          "rvol": 0.9621319705540994,
+          "rsi": 22.87917753545021
+        },
+        {
+          "ticker": "FRMI",
+          "name": "Fermi Inc.",
+          "sector": "未分類",
+          "price": 8.0,
+          "return": -75.40731540054205,
+          "signal": "🐻",
+          "rvol": 0.7724921890035912,
+          "rsi": 35.455172098670346
+        },
+        {
+          "ticker": "BRBR",
+          "name": "BellRing Brands, Inc.",
+          "sector": "Packaged Foods",
+          "price": 19.520000457763672,
+          "return": -74.5036558513153,
+          "signal": "🐻",
+          "rvol": 1.0464882312475836,
+          "rsi": 35.15889795262504
+        },
+        {
+          "ticker": "FISV",
+          "name": "Fiserv, Inc.",
+          "sector": "💳 FinTech: Infra & B2B",
+          "price": 60.0,
+          "return": -73.91984671967205,
+          "signal": "🐻",
+          "rvol": 0.9952599235120587,
+          "rsi": 33.74677278684544
+        },
+        {
+          "ticker": "GLOB",
+          "name": "Globant S.A.",
+          "sector": "Information Technology Services",
+          "price": 60.029998779296875,
+          "return": -72.39365388743357,
+          "signal": null,
+          "rvol": 0.7845655840872264,
+          "rsi": 37.480847599382635
+        },
+        {
+          "ticker": "VERX",
+          "name": "Vertex, Inc.",
+          "sector": "Software - Application",
+          "price": 15.729999542236328,
+          "return": -72.30633846210881,
+          "signal": "🐻🧊",
+          "rvol": 1.9913296298219199,
+          "rsi": 29.268300517420784
+        }
+      ]
+    }
+  },
+  "sectors": [
+    {
+      "sector": " 👓 Future Tech: AR/VR & Wearables",
+      "count": 7,
+      "returns": {
+        "1d": 7.352856281359533,
+        "5d": -7.273533978554214,
+        "1mo": -14.682873277622445,
+        "3mo": -20.341248971912876,
+        "6mo": -11.201445222485162,
+        "YTD": -10.869571620834142,
+        "1y": -33.27218903158667
+      }
+    },
+    {
+      "sector": "Advertising Agencies",
+      "count": 1,
+      "returns": {
+        "1d": 5.5999973842075885,
+        "5d": -11.494251508591336,
+        "1mo": -18.661971387586938,
+        "3mo": 1.8181814360433413,
+        "6mo": -27.84161508723941,
+        "YTD": -17.720390491858183,
+        "1y": -59.59964930472652
+      }
+    },
+    {
+      "sector": "Aerospace & Defense",
+      "count": 1,
+      "returns": {
+        "1d": 4.332425393825908,
+        "5d": 1.0957119881910065,
+        "1mo": 31.467814302239805,
+        "3mo": 61.73179366185008,
+        "6mo": 155.18161028653893,
+        "YTD": 41.1873146409891,
+        "1y": 300.5230045488068
+      }
+    },
+    {
+      "sector": "Apparel Manufacturing",
+      "count": 2,
+      "returns": {
+        "1d": 19.865877399197053,
+        "5d": 21.72546485752769,
+        "1mo": 32.93273821348697,
+        "3mo": 65.21561786783663,
+        "6mo": 15.460408326843488,
+        "YTD": 52.51467254783522,
+        "1y": 6.556942274016009
+      }
+    },
+    {
+      "sector": "Banks - Regional",
+      "count": 1,
+      "returns": {
+        "1d": -0.4999995231628418,
+        "5d": -1.7283992188819028,
+        "1mo": 14.04011484807374,
+        "3mo": 12.747876808241152,
+        "6mo": 37.71625863679521,
+        "YTD": 19.51952283061999,
+        "1y": 95.93064335529729
+      }
+    },
+    {
+      "sector": "Biotechnology",
+      "count": 8,
+      "returns": {
+        "1d": 5.7270253135906355,
+        "5d": 7.2078968619841906,
+        "1mo": 22.812078514237996,
+        "3mo": 188.0473094340683,
+        "6mo": 353.49193387710113,
+        "YTD": 51.41370352846322,
+        "1y": 640.524515657145
+      }
+    },
+    {
+      "sector": "Credit Services",
+      "count": 1,
+      "returns": {
+        "1d": 6.914893380923203,
+        "5d": 3.4083583695836897,
+        "1mo": -12.703583837653776,
+        "3mo": -28.374167584657815,
+        "6mo": -50.84433763196675,
+        "YTD": -16.554231750276895,
+        "1y": -60.84960282822932
+      }
+    },
+    {
+      "sector": "Electronic Components",
+      "count": 1,
+      "returns": {
+        "1d": 6.480881271690992,
+        "5d": 0.386970361122096,
+        "1mo": 40.467371619239515,
+        "3mo": 40.707972118623914,
+        "6mo": 127.3523995466,
+        "YTD": 42.86956787109375,
+        "1y": 282.83495856720265
+      }
+    },
+    {
+      "sector": "Gold",
+      "count": 1,
+      "returns": {
+        "1d": -0.6155601857055167,
+        "5d": 3.6172745700787066,
+        "1mo": 4.042182462761447,
+        "3mo": 81.40960467910223,
+        "6mo": 121.7228429637768,
+        "YTD": 9.426991557602282,
+        "1y": 346.23115939120595
+      }
+    },
+    {
+      "sector": "Household & Personal Products",
+      "count": 2,
+      "returns": {
+        "1d": -7.611758139291896,
+        "5d": -5.946463813828778,
+        "1mo": -2.806195606895521,
+        "3mo": -8.257877348008677,
+        "6mo": -29.703395598804605,
+        "YTD": -4.267457150059323,
+        "1y": -33.54268295973488
+      }
+    },
+    {
+      "sector": "Information Technology Services",
+      "count": 2,
+      "returns": {
+        "1d": 3.4152329257363716,
+        "5d": -17.83042848511478,
+        "1mo": -25.52374759315142,
+        "3mo": -17.176874731785563,
+        "6mo": -27.458959336304126,
+        "YTD": -23.101013646532934,
+        "1y": -71.42892954145589
+      }
+    },
+    {
+      "sector": "Internet Content & Information",
+      "count": 1,
+      "returns": {
+        "1d": 5.139967346612938,
+        "5d": -10.367760852504263,
+        "1mo": -15.895741410016592,
+        "3mo": -19.160198574240077,
+        "6mo": -33.12901059597355,
+        "YTD": -13.48187219236908,
+        "1y": -63.27348596484351
+      }
+    },
+    {
+      "sector": "Medical Instruments & Supplies",
+      "count": 1,
+      "returns": {
+        "1d": 17.766092511738183,
+        "5d": 23.98807512922145,
+        "1mo": 26.907980785771063,
+        "3mo": 44.416878076309665,
+        "6mo": 44.84818397436007,
+        "YTD": 34.03962049119808,
+        "1y": 36.941178265739886
+      }
+    },
+    {
+      "sector": "Other Industrial Metals & Mining",
+      "count": 1,
+      "returns": {
+        "1d": 11.02362671835031,
+        "5d": 24.889286351737898,
+        "1mo": 48.26498467001164,
+        "3mo": 131.90790392107593,
+        "6mo": 254.27136467079964,
+        "YTD": 60.0453996582577,
+        "1y": 364.1975579971363
+      }
+    },
+    {
+      "sector": "Packaged Foods",
+      "count": 1,
+      "returns": {
+        "1d": 0.20534351369266815,
+        "5d": -21.51186248868111,
+        "1mo": -15.314528833568145,
+        "3mo": -35.25704575542805,
+        "6mo": -50.15321620576142,
+        "YTD": -26.97343512138886,
+        "1y": -74.5036558513153
+      }
+    },
+    {
+      "sector": "REIT - Office",
+      "count": 1,
+      "returns": {
+        "1d": 3.8216524527683675,
+        "5d": -5.452439365065316,
+        "1mo": -20.098041461459168,
+        "3mo": -51.68939411326892,
+        "6mo": -55.561616408273274,
+        "YTD": -24.746078707807396,
+        "1y": -63.729417589761475
+      }
+    },
+    {
+      "sector": "Restaurants",
+      "count": 1,
+      "returns": {
+        "1d": 3.679239392577859,
+        "5d": -6.228673031384754,
+        "1mo": -17.801048128740472,
+        "3mo": -22.47075022299032,
+        "6mo": -46.142446950040345,
+        "YTD": -5.503012356191368,
+        "1y": -63.840394620520335
+      }
+    },
+    {
+      "sector": "Semiconductors",
+      "count": 2,
+      "returns": {
+        "1d": 15.079862241748453,
+        "5d": 7.67204019950316,
+        "1mo": 11.037229799503397,
+        "3mo": 26.071861356058076,
+        "6mo": 90.10866089528106,
+        "YTD": 30.186647154178807,
+        "1y": 285.1693190053063
+      }
+    },
+    {
+      "sector": "Software - Application",
+      "count": 4,
+      "returns": {
+        "1d": 6.346364146417203,
+        "5d": -8.257513761197657,
+        "1mo": -29.711531188695602,
+        "3mo": -36.36580206960467,
+        "6mo": -44.83254228735795,
+        "YTD": -28.3056836711176,
+        "1y": -34.36514646135464
+      }
+    },
+    {
+      "sector": "Software - Infrastructure",
+      "count": 1,
+      "returns": {
+        "1d": -0.03975981512292679,
+        "5d": -13.15062027928997,
+        "1mo": -24.64029097814965,
+        "3mo": -45.93548518355175,
+        "6mo": -43.50138956821938,
+        "YTD": -27.40398632011145,
+        "1y": -65.76642049624346
+      }
+    },
+    {
+      "sector": "Telecom Services",
+      "count": 1,
+      "returns": {
+        "1d": 49.709065907299845,
+        "5d": 63.13406060790345,
+        "1mo": 61.960435379773784,
+        "3mo": 63.72727480801669,
+        "6mo": 57.98246343453602,
+        "YTD": 52.36887219860179,
+        "1y": 63.43012232992837
+      }
+    },
+    {
+      "sector": "☀️ Energy: Solar",
+      "count": 7,
+      "returns": {
+        "1d": 4.417552513994612,
+        "5d": 9.999009706124664,
+        "1mo": 21.555368569201175,
+        "3mo": 11.318774771486876,
+        "6mo": 74.90083047775308,
+        "YTD": 22.993729896022703,
+        "1y": 93.57295790378078
+      }
+    },
+    {
+      "sector": "☄️ Space: Speculative",
+      "count": 7,
+      "returns": {
+        "1d": 10.624535257397401,
+        "5d": -11.256345871875654,
+        "1mo": -13.796100105130131,
+        "3mo": 20.418064917683502,
+        "6mo": 31.73043589088319,
+        "YTD": 12.984869609040775,
+        "1y": 24.87166952334851
+      }
+    },
+    {
+      "sector": "☢️ Nuclear: Utilities",
+      "count": 5,
+      "returns": {
+        "1d": 3.7737013307148084,
+        "5d": -2.64762142711202,
+        "1mo": -4.538243961422145,
+        "3mo": -11.819576969523364,
+        "6mo": -10.789915998436348,
+        "YTD": -6.956344381305648,
+        "1y": 8.260009625734737
+      }
+    },
+    {
+      "sector": "⚗️ Resources: Chem & Ag",
+      "count": 8,
+      "returns": {
+        "1d": 1.4823312016438772,
+        "5d": 3.8006044410487156,
+        "1mo": 13.550765455100121,
+        "3mo": 18.662876453704754,
+        "6mo": 18.086122917132787,
+        "YTD": 17.16398484496704,
+        "1y": 14.210567591217309
+      }
+    },
+    {
+      "sector": "⚙️ Auto: Parts",
+      "count": 8,
+      "returns": {
+        "1d": 2.435259680275643,
+        "5d": 8.954240687913773,
+        "1mo": 7.736074005611983,
+        "3mo": 13.33801821590974,
+        "6mo": 23.752576343879188,
+        "YTD": 12.792912435263714,
+        "1y": 39.897587543358746
+      }
+    },
+    {
+      "sector": "⚙️ SaaS: Data & Dev",
+      "count": 7,
+      "returns": {
+        "1d": 4.500599649353117,
+        "5d": -8.74969449610779,
+        "1mo": -19.337709044302585,
+        "3mo": -18.108773273849163,
+        "6mo": 3.3356082962672327,
+        "YTD": -17.465932590467023,
+        "1y": -22.854113320790514
+      }
+    },
+    {
+      "sector": "⚛️ Nuclear: Fuel & Tech",
+      "count": 10,
+      "returns": {
+        "1d": 8.315168300957483,
+        "5d": -4.513238950415036,
+        "1mo": -0.8084439463532703,
+        "3mo": -0.807669659530769,
+        "6mo": 24.304852961586228,
+        "YTD": 21.451573359045682,
+        "1y": 93.88759775516627
+      }
+    },
+    {
+      "sector": "⚛️ Tech: Quantum",
+      "count": 7,
+      "returns": {
+        "1d": 17.442240050837633,
+        "5d": -4.547619556635711,
+        "1mo": -23.524498630241055,
+        "3mo": -38.4588780872752,
+        "6mo": -6.020747212312179,
+        "YTD": -12.688202898686413,
+        "1y": 30.081655453306954
+      }
+    },
+    {
+      "sector": "⚡ Auto: EV Pure",
+      "count": 8,
+      "returns": {
+        "1d": 10.110806323115918,
+        "5d": 4.96823178236126,
+        "1mo": -4.39373029174315,
+        "3mo": -15.984137136001976,
+        "6mo": -9.901275621105462,
+        "YTD": -5.244791231478106,
+        "1y": -10.86921497335103
+      }
+    },
+    {
+      "sector": "⚡ Infra: Specialty",
+      "count": 9,
+      "returns": {
+        "1d": 7.091313499700525,
+        "5d": 8.644654388833825,
+        "1mo": 16.819787283575398,
+        "3mo": 14.968702545269586,
+        "6mo": 42.62420522978754,
+        "YTD": 23.282667907170698,
+        "1y": 105.33484355197861
+      }
+    },
+    {
+      "sector": "⚡ Semi: Auto & RF Power",
+      "count": 5,
+      "returns": {
+        "1d": 1.4997596269644844,
+        "5d": 12.14352522307883,
+        "1mo": 4.889714937583504,
+        "3mo": 13.55447158766981,
+        "6mo": 21.730186334278983,
+        "YTD": 14.243878822085126,
+        "1y": 11.840901801356706
+      }
+    },
+    {
+      "sector": "⛏️ Crypto: Pure Miners",
+      "count": 3,
+      "returns": {
+        "1d": 21.40482860204706,
+        "5d": -11.573812116358477,
+        "1mo": -13.043702745564332,
+        "3mo": -38.30940305663102,
+        "6mo": -9.84153380272293,
+        "YTD": 1.8043811206026252,
+        "1y": -12.585470170058642
+      }
+    },
+    {
+      "sector": "✈️ Aerospace: Suppliers",
+      "count": 5,
+      "returns": {
+        "1d": 3.4397420601106488,
+        "5d": 1.81838596411477,
+        "1mo": -0.2607940565981105,
+        "3mo": 7.343105606798373,
+        "6mo": 12.823471580207107,
+        "YTD": 4.052805405313064,
+        "1y": 40.66646556246802
+      }
+    },
+    {
+      "sector": "✈️ Transport: Airlines",
+      "count": 5,
+      "returns": {
+        "1d": 7.156137626576667,
+        "5d": 14.673514362879597,
+        "1mo": 9.302142360661161,
+        "3mo": 35.314796554657356,
+        "6mo": 39.927014556993996,
+        "YTD": 12.223938858653558,
+        "1y": 12.833663635727131
+      }
+    },
+    {
+      "sector": "✈️ Travel: Platforms",
+      "count": 7,
+      "returns": {
+        "1d": 2.003994546254099,
+        "5d": -0.5750781498240956,
+        "1mo": -6.016357561851836,
+        "3mo": 6.6550953311400525,
+        "6mo": 6.864212943650215,
+        "YTD": -3.532256128126844,
+        "1y": -2.907632239091409
+      }
+    },
+    {
+      "sector": "❄️ AI Infra: Power & Cooling",
+      "count": 5,
+      "returns": {
+        "1d": 4.104034173555687,
+        "5d": 6.623954544645737,
+        "1mo": 24.759078759772972,
+        "3mo": 13.839668322260167,
+        "6mo": 33.24141284636,
+        "YTD": 24.327476937626685,
+        "1y": 62.470360042397736
+      }
+    },
+    {
+      "sector": "未分類",
+      "count": 1,
+      "returns": {
+        "1d": 11.111114054550438,
+        "5d": -8.256883543354942,
+        "1mo": -6.32318459326851,
+        "3mo": -69.75425418055472,
+        "6mo": 0.0,
+        "YTD": 0.0,
+        "1y": -75.40731540054205
+      }
+    },
+    {
+      "sector": "🌍 Pharma: Global",
+      "count": 5,
+      "returns": {
+        "1d": 1.4472173684011254,
+        "5d": 3.855351243143152,
+        "1mo": 7.987807714713495,
+        "3mo": 21.060004076216483,
+        "6mo": 43.99943758527917,
+        "YTD": 11.507984376589656,
+        "1y": 50.747384005605184
+      }
+    },
+    {
+      "sector": "🌏 E-Commerce: Global",
+      "count": 6,
+      "returns": {
+        "1d": 1.9577769570324535,
+        "5d": -4.77658080634842,
+        "1mo": -10.062870342374275,
+        "3mo": -20.59735570309637,
+        "6mo": -10.678909750775835,
+        "YTD": -6.752392818651093,
+        "1y": -2.41289879150027
+      }
+    },
+    {
+      "sector": "🌐 AI Infra: Networking & Optical",
+      "count": 8,
+      "returns": {
+        "1d": 11.260997462109716,
+        "5d": 7.297797399315506,
+        "1mo": 10.89066392215814,
+        "3mo": 31.64669816728398,
+        "6mo": 115.4794572768378,
+        "YTD": 16.355647100335702,
+        "1y": 152.28005902719062
+      }
+    },
+    {
+      "sector": "🍔 Restaurants: All",
+      "count": 9,
+      "returns": {
+        "1d": 2.5632635236449377,
+        "5d": 5.412591421052853,
+        "1mo": 5.800009553629469,
+        "3mo": 14.161219524016465,
+        "6mo": -3.497431912046703,
+        "YTD": 11.4942506544263,
+        "1y": -9.689873876205153
+      }
+    },
+    {
+      "sector": "🎮 Consumer: Media",
+      "count": 10,
+      "returns": {
+        "1d": 3.7465527069570386,
+        "5d": -5.305560843700244,
+        "1mo": -13.807246679115545,
+        "3mo": -17.909828523100085,
+        "6mo": -13.435237577295817,
+        "YTD": -15.356140869530511,
+        "1y": 3.4713521974540997
+      }
+    },
+    {
+      "sector": "🎰 Travel: Leisure",
+      "count": 9,
+      "returns": {
+        "1d": 4.278542439258782,
+        "5d": 5.612115450269851,
+        "1mo": -1.5989391969482614,
+        "3mo": 10.498414315951619,
+        "6mo": -0.8448594705375984,
+        "YTD": -0.6745782043633912,
+        "1y": 6.0759852413711615
+      }
+    },
+    {
+      "sector": "🏗️ Energy: E&P",
+      "count": 10,
+      "returns": {
+        "1d": 1.9725497104798406,
+        "5d": 1.7190612167525967,
+        "1mo": 13.946775123585748,
+        "3mo": 16.199684225283463,
+        "6mo": 17.84435377501359,
+        "YTD": 10.67667339859699,
+        "1y": 10.355752207719165
+      }
+    },
+    {
+      "sector": "🏗️ Infra: Civil",
+      "count": 5,
+      "returns": {
+        "1d": 3.8409341338795002,
+        "5d": 5.360776274328743,
+        "1mo": 7.883777407754302,
+        "3mo": 12.518244470718589,
+        "6mo": 16.97624992247903,
+        "YTD": 11.486379290307848,
+        "1y": 23.057923241982955
+      }
+    },
+    {
+      "sector": "🏗️ Resources: Steel & Aluminum",
+      "count": 8,
+      "returns": {
+        "1d": 4.34432172483527,
+        "5d": 6.671051600861844,
+        "1mo": 13.74114505463546,
+        "3mo": 43.32724081450594,
+        "6mo": 69.15508369329237,
+        "YTD": 18.85315617980421,
+        "1y": 73.94593436278204
+      }
+    },
+    {
+      "sector": "🏗️ Semi: Front-End & Foundry Back-End, Test & Materials",
+      "count": 11,
+      "returns": {
+        "1d": 6.9986747434811285,
+        "5d": 1.460003707192085,
+        "1mo": 10.705177235749446,
+        "3mo": 31.311128511633726,
+        "6mo": 80.73087316001322,
+        "YTD": 29.048513569373288,
+        "1y": 74.60062152017379
+      }
+    },
+    {
+      "sector": "🏠 Housing: Builders",
+      "count": 8,
+      "returns": {
+        "1d": -0.09649214596613855,
+        "5d": 6.436879987485097,
+        "1mo": 12.605084011884937,
+        "3mo": 8.716356740828335,
+        "6mo": 6.030612504057837,
+        "YTD": 11.672150650041749,
+        "1y": 10.7020180720975
+      }
+    },
+    {
+      "sector": "🏠 Utilities: Defensive",
+      "count": 9,
+      "returns": {
+        "1d": -0.20010679095115014,
+        "5d": 0.2975085125120136,
+        "1mo": 5.627910881120571,
+        "3mo": 2.6038118415170164,
+        "6mo": 5.464577742661685,
+        "YTD": 4.565844366094822,
+        "1y": 18.48802731917971
+      }
+    },
+    {
+      "sector": "🏢 Industrials: HVAC",
+      "count": 6,
+      "returns": {
+        "1d": 2.0772200479313887,
+        "5d": 7.691566203151371,
+        "1mo": 12.312219577901333,
+        "3mo": 5.507163682132247,
+        "6mo": 4.785261390472021,
+        "YTD": 11.608015893816104,
+        "1y": 14.528811772398575
+      }
+    },
+    {
+      "sector": "🏪 Auto: Dealers",
+      "count": 5,
+      "returns": {
+        "1d": 4.343923648778565,
+        "5d": 4.994987275509102,
+        "1mo": 1.6224057429776142,
+        "3mo": 16.024041037087102,
+        "6mo": 4.875933794595147,
+        "YTD": 6.3074078139116665,
+        "1y": 3.597302846783832
+      }
+    },
+    {
+      "sector": "🏭 Industrials: Major",
+      "count": 7,
+      "returns": {
+        "1d": 2.628248516857521,
+        "5d": 7.132419509715824,
+        "1mo": 11.202317656875627,
+        "3mo": 17.731895001863098,
+        "6mo": 21.54442927270599,
+        "YTD": 14.569047372936696,
+        "1y": 26.419394338369663
+      }
+    },
+    {
+      "sector": "🏰 SaaS: Enterprise Giants",
+      "count": 8,
+      "returns": {
+        "1d": 1.4781869350098067,
+        "5d": -10.384165127759225,
+        "1mo": -28.520352906579163,
+        "3mo": -32.193751240601344,
+        "6mo": -32.72277083838693,
+        "YTD": -29.468501775663412,
+        "1y": -41.77813852072743
+      }
+    },
+    {
+      "sector": "🐉 Asian Tech",
+      "count": 7,
+      "returns": {
+        "1d": 4.1549790633376,
+        "5d": -0.4067270045366397,
+        "1mo": 1.2765413965336925,
+        "3mo": -7.931694127980138,
+        "6mo": 6.303111339981663,
+        "YTD": 4.725306641175694,
+        "1y": 18.318629852854876
+      }
+    },
+    {
+      "sector": "👑 FANG+",
+      "count": 10,
+      "returns": {
+        "1d": 1.9431925640068681,
+        "5d": -4.560333534319229,
+        "1mo": -7.793895019541203,
+        "3mo": -10.680741819295068,
+        "6mo": -0.042518265569627546,
+        "YTD": -7.617045295148136,
+        "1y": 17.05898971383042
+      }
+    },
+    {
+      "sector": "👑 Resources: Royalty",
+      "count": 7,
+      "returns": {
+        "1d": 4.8213166775138925,
+        "5d": -1.4296021962990608,
+        "1mo": 1.3382734664293656,
+        "3mo": 35.27405364940792,
+        "6mo": 54.020293722872,
+        "YTD": 8.90344574967805,
+        "1y": 129.0229577924794
+      }
+    },
+    {
+      "sector": "👟 Consumer: Sportswear",
+      "count": 6,
+      "returns": {
+        "1d": 2.228822137265262,
+        "5d": -0.10761418388564196,
+        "1mo": -3.964831087193177,
+        "3mo": 12.21308075853758,
+        "6mo": -3.0698147526432216,
+        "YTD": -2.876246577226429,
+        "1y": -25.759983111189246
+      }
+    },
+    {
+      "sector": "💊 Pharma: Majors",
+      "count": 8,
+      "returns": {
+        "1d": 3.7169604085758015,
+        "5d": 3.3160326672530407,
+        "1mo": 4.4249817185438385,
+        "3mo": 20.33280640299855,
+        "6mo": 33.55304716639748,
+        "YTD": 8.414931043183925,
+        "1y": 21.103287460520352
+      }
+    },
+    {
+      "sector": "💎 Consumer: Luxury",
+      "count": 9,
+      "returns": {
+        "1d": 1.9774610108066801,
+        "5d": 2.1032754795384307,
+        "1mo": -3.407239806043948,
+        "3mo": 4.078590736863492,
+        "6mo": 12.672892577386484,
+        "YTD": -2.0790124322467527,
+        "1y": 6.104029467528438
+      }
+    },
+    {
+      "sector": "💡 Utilities: Growth",
+      "count": 6,
+      "returns": {
+        "1d": 0.46758367514270915,
+        "5d": 2.841375464332513,
+        "1mo": 7.92797708095114,
+        "3mo": 4.28893268597204,
+        "6mo": 11.263464848345727,
+        "YTD": 6.348536918892706,
+        "1y": 26.649948726521938
+      }
+    },
+    {
+      "sector": "💳 FinTech: Infra & B2B",
+      "count": 8,
+      "returns": {
+        "1d": 6.807657371793547,
+        "5d": -2.594759223266153,
+        "1mo": -13.173961167847965,
+        "3mo": -10.92975592989759,
+        "6mo": -18.56546133702217,
+        "YTD": -11.914999931869161,
+        "1y": -27.27388063743853
+      }
+    },
+    {
+      "sector": "💸 FinTech: Lending",
+      "count": 6,
+      "returns": {
+        "1d": 3.4931887819724428,
+        "5d": -0.7709511801008443,
+        "1mo": -11.077730925604813,
+        "3mo": -8.325797280220824,
+        "6mo": -7.161904321724407,
+        "YTD": -6.1997199493168464,
+        "1y": -2.5140541027531587
+      }
+    },
+    {
+      "sector": "💻 Crypto: AI & HPC Pivot",
+      "count": 9,
+      "returns": {
+        "1d": 17.233529670358884,
+        "5d": -6.648424244539189,
+        "1mo": -2.4841839326816295,
+        "3mo": -26.821147504375883,
+        "6mo": 102.22660475623242,
+        "YTD": 11.343096476404998,
+        "1y": 123.49880817258071
+      }
+    },
+    {
+      "sector": "💻 Defense: Gov Services",
+      "count": 5,
+      "returns": {
+        "1d": 3.322583157617603,
+        "5d": -0.27848939556242885,
+        "1mo": 0.9302032865284456,
+        "3mo": -0.30940202915811305,
+        "6mo": -1.7580431657740891,
+        "YTD": 7.794595612004569,
+        "1y": 11.453948636694465
+      }
+    },
+    {
+      "sector": "💾 AI Infra: Storage & Memory",
+      "count": 6,
+      "returns": {
+        "1d": 5.925537288292446,
+        "5d": 4.412131834140546,
+        "1mo": 28.09629612697533,
+        "3mo": 56.35226219518794,
+        "6mo": 352.97432129000555,
+        "YTD": 52.17024512711901,
+        "1y": 452.66025680290835
+      }
+    },
+    {
+      "sector": "📝 SaaS: Productivity",
+      "count": 7,
+      "returns": {
+        "1d": 2.903193207987957,
+        "5d": -9.068726315241621,
+        "1mo": -22.024718208393008,
+        "3mo": -23.05997831693649,
+        "6mo": -21.492026571643557,
+        "YTD": -22.452960427263662,
+        "1y": -38.673187455601216
+      }
+    },
+    {
+      "sector": "📦 E-Commerce: US",
+      "count": 6,
+      "returns": {
+        "1d": 2.9995047349073682,
+        "5d": -5.26782775038737,
+        "1mo": -15.64566930829406,
+        "3mo": -9.393082951326868,
+        "6mo": -10.301520675070988,
+        "YTD": -12.119124554130027,
+        "1y": 14.779177673507952
+      }
+    },
+    {
+      "sector": "📦 Resources: Packaging",
+      "count": 7,
+      "returns": {
+        "1d": 1.9090382858511923,
+        "5d": 6.909918315084626,
+        "1mo": 11.075714085111374,
+        "3mo": 16.821721572730134,
+        "6mo": 3.078160122772563,
+        "YTD": 11.795007982057642,
+        "1y": -2.8773788184663873
+      }
+    },
+    {
+      "sector": "📱 FinTech: Consumer",
+      "count": 8,
+      "returns": {
+        "1d": 5.392478795837082,
+        "5d": -6.850831971001896,
+        "1mo": -10.074171365731747,
+        "3mo": -17.612855938800163,
+        "6mo": 0.514818285621183,
+        "YTD": -7.597967605976637,
+        "1y": 21.099948026168683
+      }
+    },
+    {
+      "sector": "📱 Housing: Tech",
+      "count": 7,
+      "returns": {
+        "1d": 1.8692897431302906,
+        "5d": -5.548511704691068,
+        "1mo": -10.034969595335664,
+        "3mo": -11.477605310427673,
+        "6mo": 13.824134831553394,
+        "YTD": -7.857115202902597,
+        "1y": 36.55042574400808
+      }
+    },
+    {
+      "sector": "📱 MedTech: Digital",
+      "count": 9,
+      "returns": {
+        "1d": 1.529109026938725,
+        "5d": -10.198279845557904,
+        "1mo": -22.833508123337,
+        "3mo": -21.035364082661317,
+        "6mo": -12.85295617432638,
+        "YTD": -13.306154908734303,
+        "1y": -25.053093080466557
+      }
+    },
+    {
+      "sector": "🔋 Energy: H2 & Battery",
+      "count": 10,
+      "returns": {
+        "1d": 7.323139761718077,
+        "5d": -10.816747259782087,
+        "1mo": -9.078536617627057,
+        "3mo": -22.11450037853006,
+        "6mo": 55.850634142868344,
+        "YTD": 1.7302176331016956,
+        "1y": 76.62117087352725
+      }
+    },
+    {
+      "sector": "🔋 Resources: Battery Chain",
+      "count": 9,
+      "returns": {
+        "1d": 6.01997608361279,
+        "5d": 2.898364157761871,
+        "1mo": -0.47236433314181053,
+        "3mo": 47.144928893757566,
+        "6mo": 73.2068868440562,
+        "YTD": 18.078548614630527,
+        "1y": 54.49248413111957
+      }
+    },
+    {
+      "sector": "🔌 Semi: Analog & Power (Ind)",
+      "count": 5,
+      "returns": {
+        "1d": 0.13706999644656026,
+        "5d": 4.865445304212839,
+        "1mo": 7.879476588239588,
+        "3mo": 21.793387650644735,
+        "6mo": 19.153287052576253,
+        "YTD": 15.785294382918664,
+        "1y": 33.97791417572835
+      }
+    },
+    {
+      "sector": "🔧 Energy: Services",
+      "count": 9,
+      "returns": {
+        "1d": 4.71685668739461,
+        "5d": 5.043813288948775,
+        "1mo": 20.79558180895967,
+        "3mo": 33.060916764124094,
+        "6mo": 65.65220500682841,
+        "YTD": 28.52973608120425,
+        "1y": 39.73463787734858
+      }
+    },
+    {
+      "sector": "🔨 Housing: Products",
+      "count": 7,
+      "returns": {
+        "1d": 2.3825889118697754,
+        "5d": 8.792680335791966,
+        "1mo": 16.08259271584267,
+        "3mo": 17.261428808426565,
+        "6mo": -4.747725751518387,
+        "YTD": 18.23222954230871,
+        "1y": -12.836488112693813
+      }
+    },
+    {
+      "sector": "🔬 MedTech: Services",
+      "count": 9,
+      "returns": {
+        "1d": -0.43673408133866093,
+        "5d": -2.964657659325837,
+        "1mo": -9.466732276571209,
+        "3mo": -1.5023689582869835,
+        "6mo": 18.298445723153364,
+        "YTD": -4.833859376983728,
+        "1y": 1.227062697992609
+      }
+    },
+    {
+      "sector": "🕵️ Cyber: Challengers",
+      "count": 5,
+      "returns": {
+        "1d": 0.8451354867210604,
+        "5d": -8.554163400047102,
+        "1mo": -14.071180909156203,
+        "3mo": -17.68424261771447,
+        "6mo": -22.701170562749297,
+        "YTD": -13.587753418773747,
+        "1y": -24.076376519010022
+      }
+    },
+    {
+      "sector": "🖥️ AI Infra: Server & Compute",
+      "count": 8,
+      "returns": {
+        "1d": 8.676558798438874,
+        "5d": 3.10915496213652,
+        "1mo": 0.3323310822905557,
+        "3mo": -17.95551446798888,
+        "6mo": 2.40788294817929,
+        "YTD": 2.403286311341308,
+        "1y": 52.084702721639324
+      }
+    },
+    {
+      "sector": "🚀 SaaS: AI & Niche Apps",
+      "count": 8,
+      "returns": {
+        "1d": 7.601805308580457,
+        "5d": -4.769339229484113,
+        "1mo": -20.433006039706274,
+        "3mo": -19.345886113405676,
+        "6mo": -15.23079476336089,
+        "YTD": -15.779214877525837,
+        "1y": -32.709405211031395
+      }
+    },
+    {
+      "sector": "🚀 Space: Leaders",
+      "count": 6,
+      "returns": {
+        "1d": 9.072402155707783,
+        "5d": -6.293971389202237,
+        "1mo": 1.3186112209205079,
+        "3mo": 45.85831387039526,
+        "6mo": 133.33590336925576,
+        "YTD": 13.733151105398798,
+        "1y": 161.44055130287293
+      }
+    },
+    {
+      "sector": "🚁 Defense: Drones",
+      "count": 10,
+      "returns": {
+        "1d": 10.90117934425137,
+        "5d": -3.707663641069737,
+        "1mo": -9.010329706620555,
+        "3mo": 0.648898822690138,
+        "6mo": 25.629097534520014,
+        "YTD": 10.55108476637491,
+        "1y": 61.415773129194214
+      }
+    },
+    {
+      "sector": "🚂 Transport: Rail",
+      "count": 5,
+      "returns": {
+        "1d": 1.1417950657913438,
+        "5d": 6.850102923657774,
+        "1mo": 11.148266563719886,
+        "3mo": 12.473117224034572,
+        "6mo": 11.695623012886896,
+        "YTD": 7.929389513848572,
+        "1y": 13.112885033282058
+      }
+    },
+    {
+      "sector": "🚗 Auto: Legacy",
+      "count": 6,
+      "returns": {
+        "1d": -2.066839460350853,
+        "5d": -1.1974912625974745,
+        "1mo": -0.7409516297529134,
+        "3mo": 1.7303246568133694,
+        "6mo": 14.88815480087458,
+        "YTD": 0.1738710000504613,
+        "1y": 22.65407134388967
+      }
+    },
+    {
+      "sector": "🚗 Services: Gig Economy",
+      "count": 6,
+      "returns": {
+        "1d": 1.4961402499965866,
+        "5d": -5.582822112578355,
+        "1mo": -14.458400848314339,
+        "3mo": -14.597808109159224,
+        "6mo": -14.860804408949805,
+        "YTD": -13.139770809313925,
+        "1y": -7.928037602541476
+      }
+    },
+    {
+      "sector": "🚚 Transport: Logistics",
+      "count": 8,
+      "returns": {
+        "1d": 2.414132558729751,
+        "5d": 16.028860178552826,
+        "1mo": 19.094586540837057,
+        "3mo": 39.12300535691484,
+        "6mo": 55.465943369527004,
+        "YTD": 26.20941003856984,
+        "1y": 30.98013892266543
+      }
+    },
+    {
+      "sector": "🚜 Industrials: Heavy",
+      "count": 8,
+      "returns": {
+        "1d": 4.787644649587246,
+        "5d": 11.314193266152188,
+        "1mo": 16.723111399507363,
+        "3mo": 24.900752155584605,
+        "6mo": 28.61977608487545,
+        "YTD": 23.843013812857762,
+        "1y": 40.92703337310666
+      }
+    },
+    {
+      "sector": "🚢 Transport: Shipping",
+      "count": 5,
+      "returns": {
+        "1d": 3.3200022825742685,
+        "5d": 1.0990470770859797,
+        "1mo": 12.432803079053866,
+        "3mo": 23.648625083114855,
+        "6mo": 35.93474113600921,
+        "YTD": 22.403323025973297,
+        "1y": 50.109609804141996
+      }
+    },
+    {
+      "sector": "🚬 Consumer: Tobacco",
+      "count": 4,
+      "returns": {
+        "1d": 0.09182114874804909,
+        "5d": 3.2615532822525686,
+        "1mo": 16.420332183282746,
+        "3mo": 17.900430562473836,
+        "6mo": 11.624381037583655,
+        "YTD": 12.39894851991955,
+        "1y": 35.180149175350934
+      }
+    },
+    {
+      "sector": "🛍️ Retail: Specialty",
+      "count": 9,
+      "returns": {
+        "1d": 2.1789568694711074,
+        "5d": 5.609665657608197,
+        "1mo": -2.501028575359423,
+        "3mo": 16.26009993123261,
+        "6mo": 36.671165324036814,
+        "YTD": -0.050785902458304784,
+        "1y": 34.41033233382604
+      }
+    },
+    {
+      "sector": "🛒 Retail: Major",
+      "count": 9,
+      "returns": {
+        "1d": 1.988244194628192,
+        "5d": 6.306667233057818,
+        "1mo": 9.88284146533523,
+        "3mo": 18.813114670765508,
+        "6mo": 8.882482470908691,
+        "YTD": 12.359806538295743,
+        "1y": 23.125526081096385
+      }
+    },
+    {
+      "sector": "🛡️ Cyber: Leaders",
+      "count": 6,
+      "returns": {
+        "1d": 3.5045826885512152,
+        "5d": -5.532016020287608,
+        "1mo": -13.40665803723653,
+        "3mo": -20.759023094201282,
+        "6mo": -10.26769136830173,
+        "YTD": -9.815816567312458,
+        "1y": -10.711010178231831
+      }
+    },
+    {
+      "sector": "🛡️ Defense: Primes",
+      "count": 7,
+      "returns": {
+        "1d": 2.8929855796785673,
+        "5d": 0.39234058358771007,
+        "1mo": 12.995246522875451,
+        "3mo": 21.886199617041626,
+        "6mo": 28.53344167031798,
+        "YTD": 16.714868563830272,
+        "1y": 64.14251752386227
+      }
+    },
+    {
+      "sector": "🛢️ Energy: Majors",
+      "count": 9,
+      "returns": {
+        "1d": 1.616669454664411,
+        "5d": 1.1227812587619925,
+        "1mo": 17.502939904568613,
+        "3mo": 18.115042883269414,
+        "6mo": 21.526094417488295,
+        "YTD": 15.486180063904534,
+        "1y": 26.59014421039838
+      }
+    },
+    {
+      "sector": "🛤️ Energy: Midstream",
+      "count": 8,
+      "returns": {
+        "1d": -0.27793290843877483,
+        "5d": 1.5591033542075639,
+        "1mo": 11.805954742685547,
+        "3mo": 17.257366620671036,
+        "6mo": 14.504066627485264,
+        "YTD": 10.22102194097211,
+        "1y": 11.732528272570587
+      }
+    },
+    {
+      "sector": "🤖 Auto: Tech",
+      "count": 4,
+      "returns": {
+        "1d": 9.392109696496021,
+        "5d": -4.735872966877439,
+        "1mo": -15.977588663157915,
+        "3mo": -27.43494265518944,
+        "6mo": -31.965025615081057,
+        "YTD": -1.5291260154564617,
+        "1y": 0.5608751327992305
+      }
+    },
+    {
+      "sector": "🤖 Robotics: Industrial",
+      "count": 5,
+      "returns": {
+        "1d": 6.955381329215845,
+        "5d": 10.65662635704681,
+        "1mo": 8.464944408711894,
+        "3mo": 14.083098637743692,
+        "6mo": 47.03799857106899,
+        "YTD": 17.268055983726818,
+        "1y": 34.51296881205651
+      }
+    },
+    {
+      "sector": "🥇 Resources: Gold Majors",
+      "count": 7,
+      "returns": {
+        "1d": 5.482405383522175,
+        "5d": 5.034728529294261,
+        "1mo": 14.96534105415103,
+        "3mo": 49.0592527794277,
+        "6mo": 76.3894915257708,
+        "YTD": 23.618465713095457,
+        "1y": 148.88020273071788
+      }
+    },
+    {
+      "sector": "🥈 Resources: Silver & Mid",
+      "count": 7,
+      "returns": {
+        "1d": 7.2494902980422475,
+        "5d": 1.9978347762246107,
+        "1mo": 7.582929397594129,
+        "3mo": 66.10779335808955,
+        "6mo": 127.89885159319643,
+        "YTD": 14.64004487032403,
+        "1y": 195.0021264758409
+      }
+    },
+    {
+      "sector": "🥉 Resources: Copper",
+      "count": 7,
+      "returns": {
+        "1d": 2.9554192264121135,
+        "5d": 1.0613334407377302,
+        "1mo": 14.56500919932,
+        "3mo": 50.24292896538189,
+        "6mo": 106.0357415640594,
+        "YTD": 21.853153609515353,
+        "1y": 138.31834664529725
+      }
+    },
+    {
+      "sector": "🥤 Consumer: Beverages",
+      "count": 7,
+      "returns": {
+        "1d": 1.532410437305552,
+        "5d": 4.475380106149896,
+        "1mo": 11.856553834895488,
+        "3mo": 13.181966707811055,
+        "6mo": 8.495071557613448,
+        "YTD": 11.870415845036751,
+        "1y": 35.15462996328746
+      }
+    },
+    {
+      "sector": "🥪 Consumer: Food",
+      "count": 7,
+      "returns": {
+        "1d": 0.3136628180322287,
+        "5d": 6.039990335270114,
+        "1mo": 15.310663700677717,
+        "3mo": 14.285193778752438,
+        "6mo": 4.708236459317197,
+        "YTD": 9.862363106374941,
+        "1y": 3.3744485569171827
+      }
+    },
+    {
+      "sector": "🦾 MedTech: Devices",
+      "count": 9,
+      "returns": {
+        "1d": -0.1395895851421538,
+        "5d": -2.8626914672281374,
+        "1mo": -6.384187169769548,
+        "3mo": -1.2733375924420935,
+        "6mo": -5.412729527750474,
+        "YTD": -3.1151400404305836,
+        "1y": -5.106813625058881
+      }
+    },
+    {
+      "sector": "🦾 Robotics: Service",
+      "count": 6,
+      "returns": {
+        "1d": 7.501830682802318,
+        "5d": 1.2758613397600815,
+        "1mo": -20.729781541086297,
+        "3mo": -15.995277444897894,
+        "6mo": -5.377149702689909,
+        "YTD": -9.522520435987406,
+        "1y": -7.8401155100868
+      }
+    },
+    {
+      "sector": "🧠 Semi: AI Compute & Logic",
+      "count": 9,
+      "returns": {
+        "1d": 8.349425060823325,
+        "5d": -0.4689490411006801,
+        "1mo": -5.772419294529062,
+        "3mo": -10.865883265516723,
+        "6mo": 12.267468567858359,
+        "YTD": -1.8306337537283985,
+        "1y": 30.980146646762144
+      }
+    },
+    {
+      "sector": "🧨 Resources: Junior Miners",
+      "count": 8,
+      "returns": {
+        "1d": 7.727184123811798,
+        "5d": 0.14163090966296554,
+        "1mo": 5.277738775903408,
+        "3mo": 89.66526382320299,
+        "6mo": 197.50407341984243,
+        "YTD": 16.77371934972482,
+        "1y": 340.4404146063059
+      }
+    },
+    {
+      "sector": "🧪 Biotech: Clinical",
+      "count": 10,
+      "returns": {
+        "1d": 11.555937511533223,
+        "5d": 1.5210521701610837,
+        "1mo": -3.8420439017970835,
+        "3mo": 2.5164886768005386,
+        "6mo": 33.52795722259479,
+        "YTD": -0.3703012489944323,
+        "1y": 43.40934801609366
+      }
+    },
+    {
+      "sector": "🧬 Biotech: Leaders",
+      "count": 8,
+      "returns": {
+        "1d": 2.1432911086743767,
+        "5d": 7.4827980526884215,
+        "1mo": -0.40132860628526945,
+        "3mo": 10.085450593126845,
+        "6mo": 26.200219450487914,
+        "YTD": 4.393279561850468,
+        "1y": 16.511181637721506
+      }
+    },
+    {
+      "sector": "🧲 Resources: Strategic",
+      "count": 9,
+      "returns": {
+        "1d": 6.171297815172472,
+        "5d": -2.665504351965572,
+        "1mo": -0.3787307445241007,
+        "3mo": 18.346114955513848,
+        "6mo": 72.77038120047851,
+        "YTD": 35.00155923040723,
+        "1y": 143.04415192667156
+      }
+    },
+    {
+      "sector": "🪙 Crypto: Exchange & Staking",
+      "count": 10,
+      "returns": {
+        "1d": 15.042211196685537,
+        "5d": -17.021391237593523,
+        "1mo": -26.242136281691195,
+        "3mo": -42.26669829308488,
+        "6mo": -35.108389443962366,
+        "YTD": -13.653289912585041,
+        "1y": -11.112146377547491
+      }
+    }
+  ]
+}

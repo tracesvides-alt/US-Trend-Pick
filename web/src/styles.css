@@ -218,7 +218,7 @@ h2 { margin-bottom: 0; color: var(--text); font-size: 19px; letter-spacing: -.02
 @media (max-width: 900px) {
   .topbar-inner, .app-body, .app-footer { width: min(100% - 28px, 1480px); }
   .app-body { display: block; }.sidebar { display: none; }.page-container { padding-top: 22px; padding-bottom: 92px; }.app-footer { padding-bottom: 86px; }
-  .mobile-nav { position: fixed; right: 12px; bottom: 12px; left: 12px; z-index: 40; display: grid; grid-template-columns: repeat(4, 1fr); padding: 6px; border: 1px solid var(--border-strong); border-radius: 13px; background: rgba(16, 21, 31, .94); box-shadow: 0 14px 42px rgba(0, 0, 0, .45); backdrop-filter: blur(18px); }
+  .mobile-nav { position: fixed; right: 12px; bottom: 12px; left: 12px; z-index: 40; display: grid; grid-template-columns: repeat(5, 1fr); padding: 6px; border: 1px solid var(--border-strong); border-radius: 13px; background: rgba(16, 21, 31, .94); box-shadow: 0 14px 42px rgba(0, 0, 0, .45); backdrop-filter: blur(18px); }
   .mobile-nav-item { min-height: 48px; padding: 4px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 0; border-radius: 9px; color: var(--text-muted); background: transparent; font-size: 9px; }.mobile-nav-item.is-active { color: var(--accent); background: rgba(76, 201, 240, .10); }.mobile-nav-item .icon { flex: 0 0 auto; }
   .content-grid, .detail-grid { grid-template-columns: 1fr; }.summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.intro-panel { align-items: flex-start; flex-direction: column; }
 }
@@ -1405,4 +1405,46 @@ h2 { margin-bottom: 0; color: var(--text); font-size: 19px; letter-spacing: -.02
   .top10-compare-stats > span { text-align: left; }
   .top10-list { padding: 13px; }
   .top10-row { min-height: 66px; }
+}
+
+/* Momentum Master market overview: optional, read-only enrichment. */
+.momentum-overview-panel { position: relative; overflow: hidden; background: linear-gradient(145deg, rgba(18, 31, 45, .94), rgba(12, 19, 30, .97)); }
+.momentum-overview-panel::after { content: ""; position: absolute; top: -120px; right: -90px; width: 300px; height: 300px; border: 1px solid rgba(76, 201, 240, .10); border-radius: 50%; box-shadow: 0 0 0 22px rgba(76, 201, 240, .018), 0 0 0 44px rgba(76, 201, 240, .012); pointer-events: none; }
+.momentum-heading { position: relative; z-index: 1; align-items: flex-end; }
+.momentum-heading .panel-subtitle { max-width: 680px; margin: 8px 0 0; color: var(--text-muted); font-size: 11px; line-height: 1.6; }
+.momentum-period-control { display: flex; align-items: center; gap: 9px; flex: 0 0 auto; }
+.momentum-period-control label { color: var(--text-muted); font-size: 10px; }
+.momentum-period-control select { min-height: 38px; padding: 0 28px 0 11px; border: 1px solid var(--border-strong); border-radius: 7px; outline: 0; color: var(--text); background: #121c2a; font: 600 11px Inter, "Noto Sans JP", sans-serif; }
+.momentum-period-control select:focus { border-color: rgba(76, 201, 240, .62); box-shadow: 0 0 0 3px rgba(76, 201, 240, .08); }
+.momentum-meta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 16px 0 11px; color: var(--text-dim); font: 10px Inter, "Noto Sans JP", sans-serif; }
+.momentum-index-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 9px; }
+.momentum-index-card { min-height: 92px; padding: 13px; border: 1px solid rgba(122, 159, 182, .17); border-radius: 9px; background: rgba(255, 255, 255, .025); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .025); }
+.momentum-index-name, .momentum-index-card small { display: block; color: var(--text-muted); font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.momentum-index-card strong { display: block; margin: 12px 0 5px; font: 800 19px Inter, ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+.momentum-value-positive { color: var(--green); }.momentum-value-negative { color: var(--red); }.momentum-value-neutral { color: var(--text-muted); }
+.momentum-ranking-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 15px; }
+.momentum-ranking-card { min-width: 0; padding: 16px; border: 1px solid rgba(122, 159, 182, .16); border-radius: 10px; background: rgba(8, 14, 23, .44); }
+.momentum-ranking-card.is-positive { border-top-color: rgba(61, 218, 164, .45); }.momentum-ranking-card.is-negative { border-top-color: rgba(255, 102, 120, .42); }
+.momentum-subheading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.momentum-subheading h3 { margin: 4px 0 0; color: var(--text); font-size: 15px; }
+.momentum-subheading p { margin: 5px 0 0; color: var(--text-muted); font-size: 10px; }
+.momentum-subheading > span { flex: 0 0 auto; color: var(--text-dim); font: 10px Inter, "Noto Sans JP", sans-serif; font-variant-numeric: tabular-nums; }
+.momentum-list { margin-top: 11px; border-top: 1px solid var(--border); }
+.momentum-row { min-height: 42px; display: grid; grid-template-columns: 28px minmax(100px, 1fr) minmax(100px, .95fr) auto; align-items: center; gap: 9px; border-bottom: 1px solid var(--border); }
+.momentum-row:last-child { border-bottom: 0; }.momentum-row:hover { background: rgba(76, 201, 240, .035); }
+.momentum-row-index { color: var(--text-dim); font: 700 10px Inter, ui-monospace, monospace; }.momentum-row-main { min-width: 0; display: flex; flex-direction: column; gap: 2px; }.momentum-row-main strong { color: var(--accent); font: 800 12px Inter, ui-monospace, monospace; }.momentum-row-main small, .momentum-row-sector { overflow: hidden; color: var(--text-muted); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }.momentum-row-return { font: 700 11px Inter, ui-monospace, monospace; font-variant-numeric: tabular-nums; }.momentum-ranking-card .return-positive { color: var(--green); }.momentum-ranking-card .return-negative { color: var(--red); }
+.momentum-sector-block { margin-top: 15px; padding: 16px; border: 1px solid rgba(122, 159, 182, .16); border-radius: 10px; background: rgba(8, 14, 23, .33); }
+.momentum-sector-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; max-height: 330px; margin-top: 12px; overflow-y: auto; padding-right: 4px; }.momentum-sector-chip { position: relative; min-width: 0; padding: 10px; overflow: hidden; border: 1px solid var(--border); border-radius: 7px; background: rgba(255, 255, 255, .025); }.momentum-sector-chip > div { display: flex; flex-direction: column; gap: 3px; min-width: 0; padding-right: 56px; }.momentum-sector-chip strong { overflow: hidden; color: var(--text); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }.momentum-sector-chip small { color: var(--text-dim); font-size: 9px; }.momentum-sector-chip > span { position: absolute; top: 10px; right: 10px; font: 700 10px Inter, ui-monospace, monospace; font-variant-numeric: tabular-nums; }.momentum-sector-chip.is-positive > span { color: var(--green); }.momentum-sector-chip.is-negative > span { color: var(--red); }.momentum-sector-chip.is-neutral > span { color: var(--text-muted); }.momentum-sector-chip i { display: block; height: 3px; margin-top: 10px; overflow: hidden; border-radius: 3px; background: rgba(255, 255, 255, .08); }.momentum-sector-chip i b { display: block; height: 100%; border-radius: inherit; background: var(--accent); }.momentum-sector-chip.is-negative i b { background: var(--red); }
+.momentum-empty { min-height: 170px; }
+
+@media (max-width: 1050px) {
+  .momentum-index-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .momentum-heading { align-items: flex-start; flex-direction: column; gap: 15px; }.momentum-period-control { width: 100%; justify-content: space-between; }.momentum-period-control select { flex: 1; max-width: 180px; }.momentum-ranking-grid { grid-template-columns: 1fr; }.momentum-sector-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 560px) {
+  .momentum-index-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }.momentum-index-card { min-height: 84px; padding: 11px; }.momentum-index-card strong { margin-top: 9px; font-size: 17px; }.momentum-ranking-card, .momentum-sector-block { padding: 13px; }.momentum-row { grid-template-columns: 24px minmax(0, 1fr) auto; gap: 7px; }.momentum-row-sector { display: none; }.momentum-sector-grid { grid-template-columns: 1fr; }
 }

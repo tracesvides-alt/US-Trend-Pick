@@ -31,6 +31,11 @@ S&P 500、NASDAQ-100、Nasdaq Next Generation 100の構成銘柄を対象に、�
   - 2回連続の週次判定でのみThemeを変更
 - Theme Constraintを適用した10銘柄Portfolio Builder
 - Pydanticで検証したFrontend用単一JSON
+- Momentum Master連携による市場補足情報
+  - 主要指数の期間別騰落率
+  - 市場全体のモメンタムTop 10 / Worst 10
+  - セクター別ヒートマップ
+  - 更新失敗時も正式ランキングへ影響しない任意データ
 - 日本語中心のダークFinTech UI、モバイルBottom Navigation、ランキング検索・並べ替え
 - GitHub Actionsによる週次実行と、成功時のみ行う静的Vercel Deploy
 
@@ -50,14 +55,23 @@ data/results/latest.json
 web/public/data/latest.json
         ↓
 React PWA（静的表示）
+
+Momentum Masterの補足データ
+        ↓
+engine.integration.momentum_master
+        ↓
+web/public/data/momentum-overview.json
+        ↓
+React PWAの「市場モメンタム」
 ```
 
-ブラウザから市場データAPIへ直接アクセスしません。Frontendは生成済みの`latest.json`だけを読み込みます。データベースは使用しません。
+ブラウザから市場データAPIへ直接アクセスしません。Frontendは生成済みの`latest.json`と任意の`momentum-overview.json`だけを読み込みます。データベースは使用しません。Momentum Masterの補足データがない場合も、正式ランキングは通常表示されます。
 
 ## ディレクトリ
 
 ```text
 engine/                 Pythonの取得・検証・ランキング・Portfolio処理
+engine/integration/     外部リサーチデータをFrontend用JSONへ正規化するAdapter
 config/                 Primary Themeマスター、互換用設定、Ticker Alias
 data/                   実行時に生成するCache・Snapshot・結果・Theme履歴
 tests/                  Unit Test、Parser Fixture、Golden Fixture
@@ -104,6 +118,11 @@ python -m engine.theme.classifier
 python -m engine.portfolio.builder
 python -m engine.results.builder
 Copy-Item data/results/latest.json web/public/data/latest.json -Force
+
+# Momentum Masterのローカルチェックアウトを補足データへ変換
+python -m engine.integration.momentum_master `
+  --source-dir "C:\path\to\momentum_master" `
+  --output web/public/data/momentum-overview.json
 ```
 
 前回のMarket Regimeを指定する場合は、次のように実行します。
@@ -128,6 +147,7 @@ python -m engine.ranking.regime --previous-state WARNING
 - `data/results/theme-review.json`: Tactical上位30銘柄のTheme状態（互換出力）
 - `data/results/YYYY-MM-DD.json`: 日付付きFrontend用結果
 - `data/results/latest.json`: 最新結果
+- `web/public/data/momentum-overview.json`: Momentum Master市場補足（主要指数、Top 10 / Worst 10、セクター）
 
 ## データ状態
 
@@ -169,6 +189,14 @@ aliases:
 
 Theme判定後は全銘柄にMaster内のThemeが付与されるため、Theme未設定を理由にPortfolio計算を停止しません。
 
+## Momentum Master連携
+
+Momentum Masterは、US Trend Pickの正式ランキング計算とは分離した市場補足情報源です。連携対象は主要指数、期間別モメンタムTop 10 / Worst 10、セクター別ヒートマップだけです。Hottest Themes / Coldest ThemesのテーマETFランキング、AI銘柄ピック、個別銘柄詳細分析、売買シグナル、ニュース、AIポートフォリオは取り込みません。
+
+`engine.integration.momentum_master`はMomentum Masterリポジトリのキャッシュを読み取り、Streamlitアプリ本体をimportせずに`momentum-overview.json`を生成します。`market_logic.py`のセクター定義はASTで読み取るだけで、ランキング計算へ再利用しません。補足JSONの`asOf` / `priceAsOf`は価格履歴の最終観測日、`cacheUpdatedAt`は元キャッシュの更新時刻（JST）です。価格履歴が利用できる場合、5日・1か月などのリターンはラベルどおりの営業日前終値から再計算し、元キャッシュの営業日位置ずれを表示へ持ち込みません。
+
+Momentum Masterの補足データは、Base、Tactical、Market Regime、Theme、Portfolioの計算条件には使用しません。補足データの取得失敗や古さは、市場モメンタム欄だけに表示し、正式ランキングの更新を停止させない方針です。
+
 ## テスト・品質確認
 
 Pythonの全テストと静的解析は次で実行します。
@@ -206,6 +234,8 @@ Vercel Deployには次のGitHub Secretsを使用します。値をソースコ�
 - `VERCEL_PROJECT_ID`
 
 Ranking、テスト、Frontend Buildがすべて成功した場合のみ、静的React PWAをVercelへDeployします。失敗時は前回の正常版を維持します。
+
+Momentum Masterの補足情報は`.github/workflows/momentum-overview.yml`で日次同期できます。Workflowは固定時刻に即取得するのではなく、Momentum Masterの`daily_update.yml`が完了し、当日JSTの`data/last_updated.txt`を確認できるまで待機します。更新成功を確認できない場合は古いキャッシュでDeployせず失敗します。Momentum MasterがPrivate Repositoryの場合は、ContentsとActionsの読み取り権限を持つ`MOMENTUM_MASTER_TOKEN`をGitHub Secretsへ登録してください。同期WorkflowにもVercelの3 Secretsが必要です。
 
 ## 既知の制約
 

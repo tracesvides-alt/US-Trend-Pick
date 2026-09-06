@@ -5,6 +5,7 @@ import yaml
 
 
 WORKFLOW = Path(__file__).parents[1] / ".github" / "workflows" / "weekly-ranking.yml"
+MOMENTUM_WORKFLOW = Path(__file__).parents[1] / ".github" / "workflows" / "momentum-overview.yml"
 
 
 def test_weekly_workflow_is_valid_yaml_and_has_requested_schedule() -> None:
@@ -72,3 +73,25 @@ def test_vercel_configuration_is_static_vite_without_functions() -> None:
     assert config["framework"] == "vite"
     assert config["outputDirectory"] == "dist"
     assert "functions" not in config
+
+
+def test_momentum_overview_workflow_waits_for_fresh_source_before_deploy() -> None:
+    text = MOMENTUM_WORKFLOW.read_text(encoding="utf-8")
+    assert yaml.safe_load(text)
+    assert 'cron: "15 21 * * *"' in text
+    assert "workflow_dispatch:" in text
+    assert "MOMENTUM_MASTER_TOKEN" in text
+    assert "repository: tracesvides-alt/momentum_master" in text
+    assert "Wait for completed Momentum Master update" in text
+    assert "actions/workflows/${SOURCE_WORKFLOW}/runs" in text
+    assert "status=${run_status}" in text
+    assert "last_updated.txt" in text
+    assert "TZ=Asia/Tokyo date +%F" in text
+    assert "古いキャッシュではDeployしません" in text
+    assert "ref: ${{ steps.source.outputs.source_sha }}" in text
+    assert "engine.integration.momentum_master" in text
+    assert "test -s web/public/data/momentum-overview.json" in text
+    assert "name: Frontend Build" in text
+    assert "name: Vercel Deploy" in text
+    deploy_block = text[text.index("- name: Vercel Deploy") :]
+    assert 'npx --yes vercel@latest deploy --prebuilt --prod' in deploy_block

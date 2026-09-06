@@ -1,0 +1,167 @@
+name: Daily Momentum Overview
+
+on:
+  schedule:
+    # Momentum Masterの完了を待ってから取得する監視Workflow。
+    - cron: "15 21 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: momentum-overview-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sync-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+
+    steps:
+      - name: Checkout US Trend Pick
+        uses: actions/checkout@v4
+
+      - name: Wait for completed Momentum Master update
+        id: source
+        env:
+          GH_TOKEN: ${{ secrets.MOMENTUM_MASTER_TOKEN }}
+          SOURCE_OWNER: tracesvides-alt
+          SOURCE_REPO: momentum_master
+          SOURCE_WORKFLOW: daily_update.yml
+          EVENT_NAME: ${{ github.event_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${GH_TOKEN:-}" || { echo "MOMENTUM_MASTER_TOKEN is not configured."; exit 1; }
+
+          deadline=$(( $(date +%s) + 14400 ))
+          source_sha=""
+          source_updated=""
+          repository=$(curl --fail-with-body --silent --show-error \
+            --header "Authorization: Bearer ${GH_TOKEN}" \
+            --header "Accept: application/vnd.github+json" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${SOURCE_OWNER}/${SOURCE_REPO}")
+          source_branch=$(printf '%s' "$repository" | jq -r '.default_branch')
+
+          while [ "$(date +%s)" -lt "$deadline" ]; do
+            response=$(curl --fail-with-body --silent --show-error \
+              --header "Authorization: Bearer ${GH_TOKEN}" \
+              --header "Accept: application/vnd.github+json" \
+              --header "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/${SOURCE_OWNER}/${SOURCE_REPO}/actions/workflows/${SOURCE_WORKFLOW}/runs?per_page=20")
+
+            latest=$(printf '%s' "$response" | jq -c '[.workflow_runs[] | select(.event == "schedule")] | sort_by(.created_at) | last // empty')
+            if [ -z "$latest" ]; then
+              echo "Momentum Masterのスケジュール実行を待機中..."
+              sleep 60
+              continue
+            fi
+
+            run_id=$(printf '%s' "$latest" | jq -r '.id')
+            run_status=$(printf '%s' "$latest" | jq -r '.status')
+            run_conclusion=$(printf '%s' "$latest" | jq -r '.conclusion // ""')
+            run_head_sha=$(printf '%s' "$latest" | jq -r '.head_sha')
+            echo "Momentum Master run=${run_id} status=${run_status} conclusion=${run_conclusion} head=${run_head_sha}"
+
+            if [ "$run_status" != "completed" ]; then
+              echo "Momentum Masterの更新完了を待機中..."
+              sleep 60
+              continue
+            fi
+
+            if [ "$run_conclusion" != "success" ]; then
+              echo "Momentum Masterの最新更新が成功していません。古いキャッシュではDeployしません。"
+              sleep 60
+              continue
+            fi
+
+            candidate_sha=$(curl --fail-with-body --silent --show-error \
+              --header "Authorization: Bearer ${GH_TOKEN}" \
+              --header "Accept: application/vnd.github+json" \
+              --header "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/${SOURCE_OWNER}/${SOURCE_REPO}/commits/${source_branch}" \
+              | jq -r '.sha')
+            marker=$(curl --fail-with-body --silent --show-error \
+              --header "Authorization: Bearer ${GH_TOKEN}" \
+              --header "Accept: application/vnd.github.raw+json" \
+              "https://api.github.com/repos/${SOURCE_OWNER}/${SOURCE_REPO}/contents/data/last_updated.txt?ref=${candidate_sha}")
+            updated_date=$(printf '%s' "$marker" | cut -c1-10)
+            jst_today=$(TZ=Asia/Tokyo date +%F)
+
+            if [ "$EVENT_NAME" = "schedule" ] && [ "$updated_date" != "$jst_today" ]; then
+              echo "成功済みRunは確認できましたが、cache日付が当日JSTではありません: ${updated_date} / ${jst_today}"
+              sleep 60
+              continue
+            fi
+
+            source_sha="$candidate_sha"
+            source_updated=$(printf '%s' "$marker" | tr -d '\r\n')
+            break
+          done
+
+          test -n "$source_sha" || { echo "Momentum Masterの当日更新を確認できないため停止しました。"; exit 1; }
+          echo "source_sha=$source_sha" >> "$GITHUB_OUTPUT"
+          echo "source_updated=$source_updated" >> "$GITHUB_OUTPUT"
+          echo "Momentum Master source SHA: $source_sha"
+          echo "Momentum Master cache updated (JST): $source_updated"
+
+      - name: Checkout Momentum Master
+        uses: actions/checkout@v4
+        with:
+          repository: tracesvides-alt/momentum_master
+          token: ${{ secrets.MOMENTUM_MASTER_TOKEN }}
+          ref: ${{ steps.source.outputs.source_sha }}
+          path: .momentum_master
+
+      - name: Python Setup 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install exporter dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install pydantic pandas
+
+      - name: Export Momentum Master overview
+        run: |
+          set -euo pipefail
+          python -m engine.integration.momentum_master \
+            --source-dir .momentum_master \
+            --output web/public/data/momentum-overview.json
+          test -s web/public/data/momentum-overview.json
+
+      - name: Node Setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Frontend Build
+        run: |
+          set -euo pipefail
+          cd web
+          npm ci
+          npm run check
+
+      - name: Vercel Deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          test -n "$VERCEL_TOKEN"
+          test -n "$VERCEL_ORG_ID"
+          test -n "$VERCEL_PROJECT_ID"
+          npx --yes vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID" --project="$VERCEL_PROJECT_ID"
+          rm -rf .vercel/output
+          mkdir -p .vercel/output/static
+          cp -R web/dist/. .vercel/output/static/
+          printf '%s\n' '{"version":3}' > .vercel/output/config.json
+          test -s .vercel/output/static/index.html
+          npx --yes vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID" --project="$VERCEL_PROJECT_ID"
