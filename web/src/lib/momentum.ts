@@ -42,6 +42,18 @@ export type MomentumSectorMember = {
   rsi?: number | null;
 };
 
+export type MomentumSelection = {
+  ticker: string;
+  name?: string | null;
+  sector?: string | null;
+  price?: number | null;
+  returnValue?: number | null;
+  period: MomentumPeriod;
+  signal?: string | null;
+  rvol?: number | null;
+  rsi?: number | null;
+};
+
 export type MomentumOverview = {
   asOf: string;
   priceAsOf?: string | null;

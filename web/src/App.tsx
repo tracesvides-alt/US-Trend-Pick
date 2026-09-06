@@ -51,6 +51,7 @@ import {
   type MomentumPeriod,
   type MomentumRow,
   type MomentumSectorMember,
+  type MomentumSelection,
 } from "./lib/momentum";
 
 type View = "dashboard" | "detail";
@@ -410,6 +411,7 @@ function App() {
   const [error, setError] = useState(false);
   const [view, setView] = useState<View>("dashboard");
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
+  const [selectedMomentum, setSelectedMomentum] = useState<MomentumSelection | null>(null);
   const [activeNav, setActiveNav] = useState<NavTarget>("home");
 
   useEffect(() => {
@@ -447,6 +449,14 @@ function App() {
 
   const openDetail = (ticker: string) => {
     setSelectedTicker(ticker);
+    setSelectedMomentum(null);
+    setView("detail");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const openMomentumDetail = (selection: MomentumSelection) => {
+    setSelectedTicker(selection.ticker);
+    setSelectedMomentum(selection);
     setView("detail");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -461,9 +471,9 @@ function App() {
         <Sidebar activeNav={activeNav} onNavigate={navigate} />
         <div className="app-content">
           {view === "detail" && selectedTicker ? (
-            <StockDetail result={result} ticker={selectedTicker} onBack={() => navigate("home")} />
+            <StockDetail result={result} ticker={selectedTicker} momentumSelection={selectedMomentum} onBack={() => navigate("home")} />
           ) : (
-            <Dashboard result={result} momentum={momentum} onSelectTicker={openDetail} onNavigate={navigate} />
+            <Dashboard result={result} momentum={momentum} onSelectTicker={openDetail} onSelectMomentumTicker={openMomentumDetail} onNavigate={navigate} />
           )}
         </div>
       </div>
@@ -533,7 +543,7 @@ function MobileNavigation({ activeNav, onNavigate }: { activeNav: NavTarget; onN
   );
 }
 
-function Dashboard({ result, momentum, onSelectTicker, onNavigate }: { result: ResultDocument; momentum: MomentumOverview | null; onSelectTicker: (ticker: string) => void; onNavigate: (target: NavTarget) => void }) {
+function Dashboard({ result, momentum, onSelectTicker, onSelectMomentumTicker, onNavigate }: { result: ResultDocument; momentum: MomentumOverview | null; onSelectTicker: (ticker: string) => void; onSelectMomentumTicker: (selection: MomentumSelection) => void; onNavigate: (target: NavTarget) => void }) {
   const holdings = activePortfolio(result.portfolio);
   const score = regimeScore(result.marketRegime);
   const regimeRecord = result.marketRegime as Record<string, unknown>;
@@ -643,7 +653,7 @@ function Dashboard({ result, momentum, onSelectTicker, onNavigate }: { result: R
         </div>
       </section>
 
-      <MomentumOverviewPanel overview={momentum} />
+      <MomentumOverviewPanel overview={momentum} onSelectTicker={onSelectMomentumTicker} />
 
       <Top10Comparison result={result} onSelectTicker={onSelectTicker} />
 
@@ -716,7 +726,7 @@ function Dashboard({ result, momentum, onSelectTicker, onNavigate }: { result: R
   );
 }
 
-function MomentumOverviewPanel({ overview }: { overview: MomentumOverview | null }) {
+function MomentumOverviewPanel({ overview, onSelectTicker }: { overview: MomentumOverview | null; onSelectTicker: (selection: MomentumSelection) => void }) {
   const [period, setPeriod] = useState<MomentumPeriod>("5d");
   const [selectedSectorName, setSelectedSectorName] = useState<string | null>(null);
   const availablePeriod = overview?.periods.includes(period) ? period : (overview?.periods[0] ?? "5d");
@@ -768,8 +778,8 @@ function MomentumOverviewPanel({ overview }: { overview: MomentumOverview | null
             })}
           </div>
           <div className="momentum-ranking-grid">
-            <MomentumRankingList title="上昇モメンタム Top 10" subtitle="選択期間のリターン上位" rows={ranking?.top ?? []} tone="positive" />
-            <MomentumRankingList title="下落モメンタム Worst 10" subtitle="選択期間のリターン下位" rows={ranking?.worst ?? []} tone="negative" />
+            <MomentumRankingList title="上昇モメンタム Top 10" subtitle="選択期間のリターン上位" rows={ranking?.top ?? []} tone="positive" period={availablePeriod} onSelectTicker={onSelectTicker} />
+            <MomentumRankingList title="下落モメンタム Worst 10" subtitle="選択期間のリターン下位" rows={ranking?.worst ?? []} tone="negative" period={availablePeriod} onSelectTicker={onSelectTicker} />
           </div>
           <div className="momentum-sector-block">
             <div className="momentum-subheading"><div><span className="eyebrow">SECTOR MOMENTUM</span><h3>セクター別ヒートマップ</h3></div><span>{sectors.length}分類</span></div>
@@ -779,7 +789,7 @@ function MomentumOverviewPanel({ overview }: { overview: MomentumOverview | null
               const isSelected = selectedSectorName === sector.sector;
               return <button type="button" className={`momentum-sector-chip is-${momentumTone(value)}${isSelected ? " is-selected" : ""}`} key={sector.sector} aria-pressed={isSelected} onClick={() => setSelectedSectorName((current) => current === sector.sector ? null : sector.sector)}><div><strong>{sector.sector}</strong><small>{sector.count}銘柄</small></div><span className="tabular-nums">{formatMomentumPercent(value)}</span><i><b style={{ width: `${width}%` }} /></i></button>;
             })}</div> : <p className="empty-copy">セクターデータはありません。</p>}
-            {selectedSector && <MomentumSectorDetail sector={selectedSector} period={availablePeriod} members={selectedMembers} />}
+            {selectedSector && <MomentumSectorDetail sector={selectedSector} period={availablePeriod} members={selectedMembers} onSelectTicker={onSelectTicker} />}
           </div>
         </>
       )}
@@ -787,7 +797,7 @@ function MomentumOverviewPanel({ overview }: { overview: MomentumOverview | null
   );
 }
 
-function MomentumSectorDetail({ sector, period, members }: { sector: { sector: string; count: number; returns: Partial<Record<MomentumPeriod, number | null>> }; period: MomentumPeriod; members: MomentumSectorMember[] }) {
+function MomentumSectorDetail({ sector, period, members, onSelectTicker }: { sector: { sector: string; count: number; returns: Partial<Record<MomentumPeriod, number | null>> }; period: MomentumPeriod; members: MomentumSectorMember[]; onSelectTicker: (selection: MomentumSelection) => void }) {
   const sectorReturn = sector.returns[period];
   return (
     <div className="momentum-sector-detail">
@@ -800,7 +810,7 @@ function MomentumSectorDetail({ sector, period, members }: { sector: { sector: s
           <div className="momentum-constituent-head"><span>#</span><span>Ticker / 企業名</span><span>リターン</span><span>価格</span><span>RVOL</span><span>RSI</span><span>Signal</span></div>
           {members.map((member, index) => {
             const value = member.returns[period];
-            return <div className="momentum-constituent-row" key={member.ticker}><span className="momentum-row-index">{String(index + 1).padStart(2, "0")}</span><span className="momentum-row-main"><strong>{member.ticker}</strong><small>{member.name ?? "企業名未取得"}</small></span><span className={`momentum-row-return return-${momentumTone(value)}`}>{formatMomentumPercent(value)}</span><span className="tabular-nums">{momentumNumber(member.price)?.toLocaleString("en-US", { maximumFractionDigits: 2 }) ?? "—"}</span><span className="tabular-nums">{momentumNumber(member.rvol)?.toFixed(2) ?? "—"}</span><span className="tabular-nums">{momentumNumber(member.rsi)?.toFixed(1) ?? "—"}</span><span className="momentum-constituent-signal">{member.signal ?? "—"}</span></div>;
+            return <button type="button" className="momentum-constituent-row" key={member.ticker} onClick={() => onSelectTicker({ ticker: member.ticker, name: member.name, sector: sector.sector, price: member.price, returnValue: value, period, signal: member.signal, rvol: member.rvol, rsi: member.rsi })} aria-label={`${member.ticker}の詳細を開く`}><span className="momentum-row-index">{String(index + 1).padStart(2, "0")}</span><span className="momentum-row-main"><strong>{member.ticker}</strong><small>{member.name ?? "企業名未取得"}</small></span><span className={`momentum-row-return return-${momentumTone(value)}`}>{formatMomentumPercent(value)}</span><span className="tabular-nums">{momentumNumber(member.price)?.toLocaleString("en-US", { maximumFractionDigits: 2 }) ?? "—"}</span><span className="tabular-nums">{momentumNumber(member.rvol)?.toFixed(2) ?? "—"}</span><span className="tabular-nums">{momentumNumber(member.rsi)?.toFixed(1) ?? "—"}</span><span className="momentum-constituent-signal">{member.signal ?? "—"}</span></button>;
           })}
         </div>
       ) : <p className="empty-copy">このセクターの構成銘柄情報はありません。</p>}
@@ -808,11 +818,11 @@ function MomentumSectorDetail({ sector, period, members }: { sector: { sector: s
   );
 }
 
-function MomentumRankingList({ title, subtitle, rows, tone }: { title: string; subtitle: string; rows: MomentumRow[]; tone: "positive" | "negative" }) {
+function MomentumRankingList({ title, subtitle, rows, tone, period, onSelectTicker }: { title: string; subtitle: string; rows: MomentumRow[]; tone: "positive" | "negative"; period: MomentumPeriod; onSelectTicker: (selection: MomentumSelection) => void }) {
   return (
     <article className={`momentum-ranking-card is-${tone}`}>
       <div className="momentum-subheading"><div><span className="eyebrow">{tone === "positive" ? "LEADERS" : "LAGGARDS"}</span><h3>{title}</h3><p>{subtitle}</p></div><span>{rows.length}銘柄</span></div>
-      <div className="momentum-list">{rows.map((row, index) => <div className="momentum-row" key={`${tone}-${row.ticker}`}><span className="momentum-row-index">{String(index + 1).padStart(2, "0")}</span><span className="momentum-row-main"><strong>{row.ticker}</strong><small>{row.name ?? "企業名未取得"}</small></span><span className="momentum-row-sector">{row.sector ?? "未分類"}</span><span className={`momentum-row-return return-${momentumTone(row.return)}`}>{formatMomentumPercent(row.return)}</span></div>)}</div>
+      <div className="momentum-list">{rows.map((row, index) => <button type="button" className="momentum-row" key={`${tone}-${row.ticker}`} onClick={() => onSelectTicker({ ticker: row.ticker, name: row.name, sector: row.sector, price: row.price, returnValue: row.return, period, signal: row.signal, rvol: row.rvol, rsi: row.rsi })} aria-label={`${row.ticker}の詳細を開く`}><span className="momentum-row-index">{String(index + 1).padStart(2, "0")}</span><span className="momentum-row-main"><strong>{row.ticker}</strong><small>{row.name ?? "企業名未取得"}</small></span><span className="momentum-row-sector">{row.sector ?? "未分類"}</span><span className={`momentum-row-return return-${momentumTone(row.return)}`}>{formatMomentumPercent(row.return)}</span></button>)}</div>
       {rows.length === 0 && <p className="empty-copy">該当データはありません。</p>}
     </article>
   );
@@ -1375,13 +1385,14 @@ function HistoryPanel({ result, onSelectTicker }: { result: ResultDocument; onSe
   );
 }
 
-function StockDetail({ result, ticker, onBack }: { result: ResultDocument; ticker: string; onBack: () => void }) {
+function StockDetail({ result, ticker, momentumSelection, onBack }: { result: ResultDocument; ticker: string; momentumSelection: MomentumSelection | null; onBack: () => void }) {
   const tactical = result.tacticalRanking.find((row) => row.ticker === ticker);
   const base = result.baseRanking.find((row) => row.ticker === ticker);
   const holding = result.portfolio.find((row) => row.ticker === ticker);
   const theme = (result.themeSnapshot ?? []).find((row) => row.ticker === ticker);
   const history = stockRankHistory(ticker, result);
-  if (!tactical && !base) return <main className="page-container detail-page"><button className="back-button" onClick={onBack}>← ダッシュボードに戻る</button><div className="panel empty-state"><strong>銘柄が見つかりません</strong><small>現在の結果JSONに該当Tickerがありません</small></div></main>;
+  const hasRanking = Boolean(tactical || base);
+  if (!hasRanking && !momentumSelection) return <main className="page-container detail-page"><button className="back-button" onClick={onBack}>← ダッシュボードに戻る</button><div className="panel empty-state"><strong>銘柄が見つかりません</strong><small>現在の結果JSONに該当Tickerがありません</small></div></main>;
 
   const currentStatus = tactical ? getTacticalStatus(tactical) : "Unranked";
   const baseSummary = tactical?.base ?? base?.base ?? {
@@ -1429,9 +1440,9 @@ function StockDetail({ result, ticker, onBack }: { result: ResultDocument; ticke
       <section className="detail-grid">
         <div className="panel chart-panel detail-panel">
           <div className="detail-panel-bar"><span>順位履歴</span><small>前回と今回のTactical順位</small></div>
-          <div className="chart-wrap"><ResponsiveContainer width="100%" height="100%"><LineChart data={history} margin={{ top: 12, right: 10, left: -20, bottom: 4 }}><CartesianGrid strokeDasharray="3 3" stroke="#263244" /><XAxis dataKey="period" stroke="#718096" tickLine={false} axisLine={false} /><YAxis reversed allowDecimals={false} stroke="#718096" tickLine={false} axisLine={false} /><Tooltip contentStyle={{ background: "#151b27", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10 }} labelStyle={{ color: "#f5f7fa" }} /><Line type="monotone" dataKey="tacticalRank" name="Tactical" stroke="#4cc9f0" strokeWidth={2.5} dot={{ r: 4, fill: "#4cc9f0", stroke: "#080b12", strokeWidth: 2 }} connectNulls /></LineChart></ResponsiveContainer></div>
+          {hasRanking && history.length > 0 ? <div className="chart-wrap"><ResponsiveContainer width="100%" height="100%"><LineChart data={history} margin={{ top: 12, right: 10, left: -20, bottom: 4 }}><CartesianGrid strokeDasharray="3 3" stroke="#263244" /><XAxis dataKey="period" stroke="#718096" tickLine={false} axisLine={false} /><YAxis reversed allowDecimals={false} stroke="#718096" tickLine={false} axisLine={false} /><Tooltip contentStyle={{ background: "#151b27", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10 }} labelStyle={{ color: "#f5f7fa" }} /><Line type="monotone" dataKey="tacticalRank" name="Tactical" stroke="#4cc9f0" strokeWidth={2.5} dot={{ r: 4, fill: "#4cc9f0", stroke: "#080b12", strokeWidth: 2 }} connectNulls /></LineChart></ResponsiveContainer></div> : <div className="empty-state detail-chart-empty"><span className="empty-mark">—</span><strong>US Trend Pickの順位履歴はありません</strong><small>この銘柄は現在のランキング対象外です。</small></div>}
         </div>
-        <div className="panel detail-stats detail-panel">
+        {hasRanking ? <div className="panel detail-stats detail-panel">
           <SectionHeading title="スナップショット" kicker="現在値" />
           <DetailStat label="Tactical順位" value={rankLabel(tacticalSummary.rank)} accent help={detailHelp.tacticalRank} />
           <DetailStat label="Base順位" value={rankLabel(baseSummary.rank)} help={detailHelp.baseRank} helpAlign="right" />
@@ -1443,12 +1454,37 @@ function StockDetail({ result, ticker, onBack }: { result: ResultDocument; ticke
           <DetailStat label="Stage" value={stageLabel(tactical?.stage)} help={detailHelp.stage} helpAlign="right" />
           <DetailStat label="New Buy" value={tactical?.new_buy === undefined ? "—" : tactical.new_buy ? "true" : "false"} help={detailHelp.newBuy} />
           <DetailStat label="採用状態" value={holding ? formatStatus(holding.status) : "未採用"} help={detailHelp.holdingStatus} helpAlign="right" />
-        </div>
+        </div> : <div className="panel detail-stats detail-panel">
+          <SectionHeading title="US Trend Pick対象状況" kicker="ランキング対象外" />
+          <DetailStat label="企業名" value={momentumSelection?.name ?? "企業名未取得"} />
+          <DetailStat label="ランキング" value="対象外" accent helpAlign="right" />
+          <DetailStat label="データ基準日" value={formatDate(result.asOf)} />
+          <p className="momentum-source-detail-note">この銘柄はMomentum Masterには掲載されていますが、現在のUS Trend Pickのランキング対象Universeには含まれていません。</p>
+        </div>}
        </section>
-      <BaseComponentsPanel components={baseComponents} universeCount={result.dataHealth.universe_count} />
-      <TacticalComponentsPanel components={tacticalComponents} universeCount={result.dataHealth.universe_count} />
-      <ThemeDetailStats snapshot={theme} />
+      {momentumSelection && <MomentumMasterDetailPanel selection={momentumSelection} />}
+      {hasRanking && <BaseComponentsPanel components={baseComponents} universeCount={result.dataHealth.universe_count} />}
+      {hasRanking && <TacticalComponentsPanel components={tacticalComponents} universeCount={result.dataHealth.universe_count} />}
+      {hasRanking && <ThemeDetailStats snapshot={theme} />}
      </main>
+  );
+}
+
+function MomentumMasterDetailPanel({ selection }: { selection: MomentumSelection }) {
+  return (
+    <section className="panel detail-panel momentum-source-detail">
+      <div className="detail-panel-bar"><span>Momentum Master情報</span><small>US Trend Pickランキングとは独立した補足データ</small></div>
+      <div className="detail-stats momentum-source-stats">
+        <DetailStat label="データ期間" value={momentumPeriodLabels[selection.period] ?? selection.period} accent />
+        <DetailStat label="期間リターン" value={formatMomentumPercent(selection.returnValue)} accent />
+        <DetailStat label="価格" value={momentumNumber(selection.price)?.toLocaleString("en-US", { maximumFractionDigits: 2 }) ?? "—"} />
+        <DetailStat label="セクター" value={selection.sector ?? "未分類"} />
+        <DetailStat label="Signal" value={selection.signal ?? "—"} />
+        <DetailStat label="RVOL" value={momentumNumber(selection.rvol)?.toFixed(2) ?? "—"} />
+        <DetailStat label="RSI" value={momentumNumber(selection.rsi)?.toFixed(1) ?? "—"} />
+      </div>
+      <p className="momentum-source-detail-note">この情報はMomentum Masterのキャッシュから表示しています。US Trend PickのBase / Tactical順位やポートフォリオ選定には影響しません。</p>
+    </section>
   );
 }
 
