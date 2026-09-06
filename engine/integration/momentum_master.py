@@ -53,12 +53,25 @@ class IndexSnapshot(BaseModel):
     error: bool = False
 
 
+class MomentumSectorMember(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    ticker: str
+    name: str | None = None
+    price: float | None = None
+    returns: dict[str, float | None] = Field(default_factory=dict)
+    signal: str | None = None
+    rvol: float | None = None
+    rsi: float | None = None
+
+
 class SectorSnapshot(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     sector: str
     count: int = Field(ge=0)
     returns: dict[str, float | None] = Field(default_factory=dict)
+    members: list[MomentumSectorMember] = Field(default_factory=list)
 
 
 class MomentumOverview(BaseModel):
@@ -320,6 +333,24 @@ def _build_rankings(
     return rankings
 
 
+def _sector_member_for(
+    row: dict[str, Any],
+    metadata: dict[str, Any],
+) -> MomentumSectorMember:
+    ticker = str(row.get("Ticker", "")).strip().upper()
+    entry = _metadata_for(metadata, ticker)
+    name = entry.get("name")
+    return MomentumSectorMember(
+        ticker=ticker,
+        name=name if isinstance(name, str) and name.strip() else None,
+        price=_float(row.get("Price")),
+        returns={period: _float(row.get(period)) for period in PERIODS},
+        signal=str(row.get("Signal", "")).strip() or None,
+        rvol=_float(row.get("RVOL")),
+        rsi=_float(row.get("RSI")),
+    )
+
+
 def _build_sectors(
     rows: list[dict[str, Any]],
     metadata: dict[str, Any],
@@ -339,7 +370,18 @@ def _build_sectors(
             values = [_float(row.get(period)) for row in sector_rows]
             values = [value for value in values if value is not None]
             returns[period] = sum(values) / len(values) if values else None
-        sectors.append(SectorSnapshot(sector=sector, count=len(sector_rows), returns=returns))
+        members = [
+            _sector_member_for(row, metadata)
+            for row in sorted(sector_rows, key=lambda item: str(item.get("Ticker", "")).upper())
+        ]
+        sectors.append(
+            SectorSnapshot(
+                sector=sector,
+                count=len(sector_rows),
+                returns=returns,
+                members=members,
+            )
+        )
     return sorted(sectors, key=lambda item: item.sector)
 
 

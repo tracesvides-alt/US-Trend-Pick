@@ -54,6 +54,8 @@ def test_builds_top_worst_indices_and_sector_heatmap(tmp_path: Path) -> None:
     sectors = {item.sector: item for item in document.sectors}
     assert sectors["Semiconductors"].count == 2
     assert sectors["Semiconductors"].returns["1d"] == 0.0
+    assert [member.ticker for member in sectors["Semiconductors"].members] == ["AAA", "BBB"]
+    assert sectors["Semiconductors"].members[0].returns["5d"] == 5.0
     assert sectors["Healthcare"].count == 1
 
 

@@ -29,6 +29,17 @@ export type MomentumSector = {
   sector: string;
   count: number;
   returns: Partial<Record<MomentumPeriod, number | null>>;
+  members?: MomentumSectorMember[];
+};
+
+export type MomentumSectorMember = {
+  ticker: string;
+  name?: string | null;
+  price?: number | null;
+  returns: Partial<Record<MomentumPeriod, number | null>>;
+  signal?: string | null;
+  rvol?: number | null;
+  rsi?: number | null;
 };
 
 export type MomentumOverview = {

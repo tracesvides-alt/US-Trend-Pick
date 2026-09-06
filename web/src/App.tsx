@@ -50,6 +50,7 @@ import {
   type MomentumOverview,
   type MomentumPeriod,
   type MomentumRow,
+  type MomentumSectorMember,
 } from "./lib/momentum";
 
 type View = "dashboard" | "detail";
@@ -717,6 +718,7 @@ function Dashboard({ result, momentum, onSelectTicker, onNavigate }: { result: R
 
 function MomentumOverviewPanel({ overview }: { overview: MomentumOverview | null }) {
   const [period, setPeriod] = useState<MomentumPeriod>("5d");
+  const [selectedSectorName, setSelectedSectorName] = useState<string | null>(null);
   const availablePeriod = overview?.periods.includes(period) ? period : (overview?.periods[0] ?? "5d");
   const ranking = overview?.rankings[availablePeriod];
   const sectors = useMemo(() => {
@@ -728,6 +730,13 @@ function MomentumOverviewPanel({ overview }: { overview: MomentumOverview | null
   const maxSectorMove = Math.max(
     1,
     ...sectors.map((sector) => Math.abs(momentumNumber(sector.returns[availablePeriod]) ?? 0)),
+  );
+  const selectedSector = sectors.find((sector) => sector.sector === selectedSectorName) ?? null;
+  const selectedMembers = useMemo(
+    () => [...(selectedSector?.members ?? [])].sort(
+      (left, right) => (momentumNumber(right.returns[availablePeriod]) ?? -Infinity) - (momentumNumber(left.returns[availablePeriod]) ?? -Infinity),
+    ),
+    [availablePeriod, selectedSector],
   );
 
   return (
@@ -767,12 +776,35 @@ function MomentumOverviewPanel({ overview }: { overview: MomentumOverview | null
             {sectors.length > 0 ? <div className="momentum-sector-grid">{sectors.map((sector) => {
               const value = momentumNumber(sector.returns[availablePeriod]);
               const width = Math.min(100, Math.abs(value ?? 0) / maxSectorMove * 100);
-              return <div className={`momentum-sector-chip is-${momentumTone(value)}`} key={sector.sector}><div><strong>{sector.sector}</strong><small>{sector.count}銘柄</small></div><span className="tabular-nums">{formatMomentumPercent(value)}</span><i><b style={{ width: `${width}%` }} /></i></div>;
+              const isSelected = selectedSectorName === sector.sector;
+              return <button type="button" className={`momentum-sector-chip is-${momentumTone(value)}${isSelected ? " is-selected" : ""}`} key={sector.sector} aria-pressed={isSelected} onClick={() => setSelectedSectorName((current) => current === sector.sector ? null : sector.sector)}><div><strong>{sector.sector}</strong><small>{sector.count}銘柄</small></div><span className="tabular-nums">{formatMomentumPercent(value)}</span><i><b style={{ width: `${width}%` }} /></i></button>;
             })}</div> : <p className="empty-copy">セクターデータはありません。</p>}
+            {selectedSector && <MomentumSectorDetail sector={selectedSector} period={availablePeriod} members={selectedMembers} />}
           </div>
         </>
       )}
     </section>
+  );
+}
+
+function MomentumSectorDetail({ sector, period, members }: { sector: { sector: string; count: number; returns: Partial<Record<MomentumPeriod, number | null>> }; period: MomentumPeriod; members: MomentumSectorMember[] }) {
+  const sectorReturn = sector.returns[period];
+  return (
+    <div className="momentum-sector-detail">
+      <div className="momentum-subheading">
+        <div><span className="eyebrow">SECTOR CONSTITUENTS</span><h3>{sector.sector}の銘柄情報</h3><p>{momentumPeriodLabels[period]}リターン順 / {sector.count}銘柄</p></div>
+        <strong className={`momentum-sector-detail-return return-${momentumTone(sectorReturn)}`}>{formatMomentumPercent(sectorReturn)}</strong>
+      </div>
+      {members.length > 0 ? (
+        <div className="momentum-constituent-table">
+          <div className="momentum-constituent-head"><span>#</span><span>Ticker / 企業名</span><span>リターン</span><span>価格</span><span>RVOL</span><span>RSI</span><span>Signal</span></div>
+          {members.map((member, index) => {
+            const value = member.returns[period];
+            return <div className="momentum-constituent-row" key={member.ticker}><span className="momentum-row-index">{String(index + 1).padStart(2, "0")}</span><span className="momentum-row-main"><strong>{member.ticker}</strong><small>{member.name ?? "企業名未取得"}</small></span><span className={`momentum-row-return return-${momentumTone(value)}`}>{formatMomentumPercent(value)}</span><span className="tabular-nums">{momentumNumber(member.price)?.toLocaleString("en-US", { maximumFractionDigits: 2 }) ?? "—"}</span><span className="tabular-nums">{momentumNumber(member.rvol)?.toFixed(2) ?? "—"}</span><span className="tabular-nums">{momentumNumber(member.rsi)?.toFixed(1) ?? "—"}</span><span className="momentum-constituent-signal">{member.signal ?? "—"}</span></div>;
+          })}
+        </div>
+      ) : <p className="empty-copy">このセクターの構成銘柄情報はありません。</p>}
+    </div>
   );
 }
 
