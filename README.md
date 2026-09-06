@@ -235,7 +235,7 @@ Vercel Deployには次のGitHub Secretsを使用します。値をソースコ�
 
 Ranking、テスト、Frontend Buildがすべて成功した場合のみ、静的React PWAをVercelへDeployします。失敗時は前回の正常版を維持します。
 
-Momentum Masterの補足情報は`.github/workflows/momentum-overview.yml`で日次同期できます。Workflowは固定時刻に即取得するのではなく、Momentum Masterの`daily_update.yml`が完了し、当日JSTの`data/last_updated.txt`を確認できるまで待機します。更新成功を確認できない場合は古いキャッシュでDeployせず失敗します。Momentum MasterがPrivate Repositoryの場合は、ContentsとActionsの読み取り権限を持つ`MOMENTUM_MASTER_TOKEN`をGitHub Secretsへ登録してください。同期WorkflowにもVercelの3 Secretsが必要です。
+Momentum Masterの補足情報は`.github/workflows/momentum-overview.yml`で日次同期できます。Workflowは固定時刻に即取得するのではなく、Momentum Masterの`daily_update.yml`が完了し、当日JSTの`data/last_updated.txt`を確認できるまで待機します。更新成功を確認できない場合は古いキャッシュでDeployせず失敗します。生成した`web/public/data/momentum-overview.json`はUS Trend Pick側にも自動commitしてからDeployするため、後続のGit連携Deployで古いJSONへ戻りません。Momentum MasterがPrivate Repositoryの場合は、ContentsとActionsの読み取り権限を持つ`MOMENTUM_MASTER_TOKEN`をGitHub Secretsへ登録してください。同期WorkflowにもVercelの3 Secretsが必要です。
 
 ## 既知の制約
 

@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: momentum-overview-${{ github.ref }}
@@ -133,6 +133,19 @@ jobs:
             --source-dir .momentum_master \
             --output web/public/data/momentum-overview.json
           test -s web/public/data/momentum-overview.json
+
+      - name: Commit refreshed market overview
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/public/data/momentum-overview.json
+          if git diff --cached --quiet; then
+            echo "Momentum Master overview has no changes."
+          else
+            git commit -m "Update Momentum Master market overview [skip ci]"
+            git push origin HEAD:main
+          fi
 
       - name: Node Setup
         uses: actions/setup-node@v4

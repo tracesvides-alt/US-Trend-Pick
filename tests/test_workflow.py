@@ -81,6 +81,7 @@ def test_momentum_overview_workflow_waits_for_fresh_source_before_deploy() -> No
     assert 'cron: "15 21 * * *"' in text
     assert "workflow_dispatch:" in text
     assert "MOMENTUM_MASTER_TOKEN" in text
+    assert "contents: write" in text
     assert "repository: tracesvides-alt/momentum_master" in text
     assert "Wait for completed Momentum Master update" in text
     assert "actions/workflows/${SOURCE_WORKFLOW}/runs" in text
@@ -91,6 +92,9 @@ def test_momentum_overview_workflow_waits_for_fresh_source_before_deploy() -> No
     assert "ref: ${{ steps.source.outputs.source_sha }}" in text
     assert "engine.integration.momentum_master" in text
     assert "test -s web/public/data/momentum-overview.json" in text
+    assert "name: Commit refreshed market overview" in text
+    assert "git add web/public/data/momentum-overview.json" in text
+    assert "git push origin HEAD:main" in text
     assert "name: Frontend Build" in text
     assert "name: Vercel Deploy" in text
     deploy_block = text[text.index("- name: Vercel Deploy") :]
