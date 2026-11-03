@@ -31,6 +31,13 @@ REGIME_WEIGHTS = {
     "volatility_regime": 0.20,
 }
 
+# Breadth is computed over the members that have usable price history.
+# A source universe only contributes its ratio when at least this fraction
+# of its members are usable, so a few missing or newly listed tickers
+# (history shorter than the DMA window) cannot void the whole regime,
+# while a genuinely broken data feed still yields no breadth score.
+MIN_BREADTH_COVERAGE = 0.90
+
 
 class RegimeState:
     """String constants used for regime state and hysteresis."""
@@ -61,6 +68,7 @@ class BreadthMetrics:
     member_counts: dict[str, int]
     missing_tickers: dict[str, list[str]]
     status: str
+    coverage: dict[str, float] | None = None
 
 
 @dataclass(frozen=True)
@@ -157,7 +165,13 @@ def calculate_breadth(
     price_data: pd.DataFrame,
     dma_window: int = 50,
 ) -> BreadthMetrics:
-    """Calculate equal-weighted SPY, QQQ, and QQQJ constituent breadth."""
+    """Calculate equal-weighted SPY, QQQ, and QQQJ constituent breadth.
+
+    Members without usable history for the DMA window (missing downloads,
+    newly listed tickers) are excluded from their source's ratio and are
+    reported in ``missing_tickers``; a source contributes only when its
+    usable coverage reaches ``MIN_BREADTH_COVERAGE``.
+    """
 
     groups = {
         ticker: rows
@@ -168,6 +182,7 @@ def calculate_breadth(
     ratios: dict[str, float | None] = {}
     member_counts: dict[str, int] = {}
     missing: dict[str, list[str]] = {}
+    coverage: dict[str, float] = {}
     for source, column in (
         ("sp500", "source_spy"),
         ("nasdaq100", "source_qqq"),
@@ -177,6 +192,7 @@ def calculate_breadth(
             ratios[source] = None
             member_counts[source] = 0
             missing[source] = [f"missing {column} column"]
+            coverage[source] = 0.0
             continue
         members = sorted(
             set(
@@ -196,11 +212,16 @@ def calculate_breadth(
                 missing[source].append(ticker)
             else:
                 values.append(above)
-        ratios[source] = float(np.mean(values)) if not missing[source] and values else None
+        coverage[source] = len(values) / len(members) if members else 0.0
+        ratios[source] = (
+            float(np.mean(values))
+            if values and coverage[source] >= MIN_BREADTH_COVERAGE
+            else None
+        )
     valid_ratios = [ratio for ratio in ratios.values() if ratio is not None]
     score = float(np.mean(valid_ratios) * 100.0) if len(valid_ratios) == 3 else None
     status = "OK" if score is not None else "INCOMPLETE"
-    return BreadthMetrics(score, ratios, member_counts, missing, status)
+    return BreadthMetrics(score, ratios, member_counts, missing, status, coverage)
 
 
 def calculate_20d_return(
@@ -399,6 +420,8 @@ def _breadth_dict(metrics: BreadthMetrics) -> dict[str, Any]:
         "ratios": metrics.ratios,
         "member_counts": metrics.member_counts,
         "missing_tickers": metrics.missing_tickers,
+        "coverage": metrics.coverage,
+        "min_coverage_required": MIN_BREADTH_COVERAGE,
         "status": metrics.status,
     }
 

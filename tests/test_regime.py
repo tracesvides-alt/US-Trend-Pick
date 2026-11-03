@@ -60,6 +60,52 @@ def test_breadth_is_equal_weighted_across_three_universes() -> None:
     assert result.score == pytest.approx(100 * (2 / 3 + 0.5 + 0.5) / 3)
 
 
+def _breadth_inputs(member_count: int, missing_ticker: str | None):
+    tickers = [f"T{i}" for i in range(member_count)]
+    universe = pd.DataFrame(
+        {
+            "ticker": tickers,
+            "source_spy": [True] * member_count,
+            "source_qqq": [True] * member_count,
+            "source_qqqj": [True] * member_count,
+        }
+    )
+    dates = pd.date_range("2024-01-01", periods=3, freq="B")
+    frames = [
+        pd.DataFrame({"date": dates, "ticker": t, "Adj Close": [1.0, 2.0, 3.0]})
+        for t in tickers
+        if t != missing_ticker
+    ]
+    return universe, pd.concat(frames, ignore_index=True)
+
+
+def test_breadth_excludes_missing_members_when_coverage_is_sufficient() -> None:
+    universe, price_data = _breadth_inputs(10, "T9")
+
+    result = calculate_breadth(universe, price_data, dma_window=2)
+
+    assert result.missing_tickers == {
+        "sp500": ["T9"],
+        "nasdaq100": ["T9"],
+        "next100": ["T9"],
+    }
+    assert result.coverage == {"sp500": 0.9, "nasdaq100": 0.9, "next100": 0.9}
+    assert result.ratios == {"sp500": 1.0, "nasdaq100": 1.0, "next100": 1.0}
+    assert result.score == 100.0
+    assert result.status == "OK"
+
+
+def test_breadth_returns_none_when_coverage_below_threshold() -> None:
+    universe, price_data = _breadth_inputs(3, "T2")
+
+    result = calculate_breadth(universe, price_data, dma_window=2)
+
+    assert result.coverage == {"sp500": 2 / 3, "nasdaq100": 2 / 3, "next100": 2 / 3}
+    assert result.ratios == {"sp500": None, "nasdaq100": None, "next100": None}
+    assert result.score is None
+    assert result.status == "INCOMPLETE"
+
+
 def test_strategy_leadership_score_mapping_boundaries() -> None:
     assert strategy_leadership_score(-0.08) == 0.0
     assert strategy_leadership_score(-0.03) == 30.0
